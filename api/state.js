@@ -11,7 +11,9 @@ const RANGE_SPECS = {
   FXRates: "FXRates!A2:J",
   MonthlyPlans: "MonthlyPlans!A2:N",
   Goals: "Goals!A2:O",
-  ForecastEvents: "ForecastEvents!A2:O"
+  ForecastEvents: "ForecastEvents!A2:O",
+  Scenarios: "Scenarios!A2:M",
+  ScenarioItems: "ScenarioItems!A2:O"
 };
 
 const now = () => new Date().toISOString();
@@ -88,6 +90,17 @@ async function readState() {
       id: String(r[0]||""), name: String(r[1]||""), date: String(r[2]||"").slice(0,10), type: String(r[3]||"expense").toLowerCase(),
       category: categoryName(r[4], cats), amount: num(r[5]), currency: String(r[6]||"SAR").toUpperCase(),
       probability: num(r[7]) || 100, scenarioId: String(r[8]||""), status: String(r[9]||"PLANNED"), notes: String(r[10]||""), accountId: ""
+    })),
+    spendScenarios: values.Scenarios.filter(r => !r[9] && String(r[10]||"").toUpperCase() === "SPEND").map(r => ({
+      id: String(r[0]||""), name: String(r[1]||""), notes: String(r[6]||""),
+      status: String(r[11]||"DRAFT").toUpperCase(), approvedAt: String(r[12]||""),
+      createdAt: String(r[7]||"")
+    })),
+    scenarioItems: values.ScenarioItems.filter(r => !r[13]).map(r => ({
+      id: String(r[0]||""), scenarioId: String(r[1]||""), name: String(r[2]||""),
+      category: categoryName(r[3], cats), amount: num(r[4]), currency: String(r[5]||"SAR").toUpperCase(),
+      timing: String(r[6]||"ONE_TIME").toUpperCase(), startMonth: month(r[7]), endMonth: month(r[8]),
+      bucket: String(r[9]||"nonmonthly").toLowerCase(), notes: String(r[10]||""), createdAt: String(r[11]||"")
     }))
   };
   return { state, cats };
@@ -112,10 +125,11 @@ async function writeState(state) {
   arrays("fxRates").forEach(x => { if (beforeStartMonth(x.month)) invalid.push(`FX rate "${x.id}" is before project start`); });
   arrays("budgets").forEach(x => { if (beforeStartMonth(x.startMonth)) invalid.push(`Monthly plan "${x.category||x.id}" starts before project start`); });
   arrays("events").forEach(x => { if (beforeStartDate(x.date)) invalid.push(`Forecast event "${x.name||x.id}" is before project start`); });
+  arrays("scenarioItems").forEach(x => { if (beforeStartMonth(x.startMonth)) invalid.push(`Scenario item "${x.name||x.id}" starts before project start`); });
   if (invalid.length) throw new Error(`Project starts on ${projectStartDate}. ${invalid.slice(0,5).join("; ")}`);
 
   const appConfig = [
-    ["schema_version","1.1","FinanceControl Google Sheets database schema",ts],
+    ["schema_version","1.2","FinanceControl Google Sheets database schema",ts],
     ["app_name","FinanceControl","Application name",ts],
     ["reporting_currency",settings.reportCurrency || "SAR","Primary dashboard/reporting currency",ts],
     ["supported_currencies","SAR,EGP","Currencies accepted by the app",ts],
@@ -137,7 +151,15 @@ async function writeState(state) {
     FXRates: arrays("fxRates").map(f => [f.id,dateFromMonth(f.month),"EGP","SAR",num(f.rate),f.note||"Manual","true",ts,ts,""]),
     MonthlyPlans: arrays("budgets").map(b => [b.id,b.startMonth,categoryId(b.category,cats),num(b.amount),b.currency,b.bucket||"flex",!!b.rollover,b.notes||"",ts,ts,"",1,b.endMonth||"",b.scheduleMode||"ongoing"]),
     Goals: arrays("goals").map(g => [g.id,g.name,num(g.target),g.currency,dateFromMonth(g.dueMonth),num(g.current),num(g.monthlyContribution),g.priority||"",g.status||"ACTIVE",g.accountId||"",g.notes||"",ts,ts,"",1]),
-    ForecastEvents: arrays("events").map(e => [e.id,e.name,e.date,e.type,categoryId(e.category,cats),num(e.amount),e.currency,num(e.probability)||100,e.scenarioId||"",e.status||"PLANNED",e.notes||"",ts,ts,"",1])
+    ForecastEvents: arrays("events").map(e => [e.id,e.name,e.date,e.type,categoryId(e.category,cats),num(e.amount),e.currency,num(e.probability)||100,e.scenarioId||"",e.status||"PLANNED",e.notes||"",ts,ts,"",1]),
+    Scenarios: [
+      ["scn_base","Base",1,1,"",true,"Normal recurring income/expense assumptions",ts,ts,"","STRESS","ACTIVE",""],
+      ["scn_conservative","Conservative",0.95,1.1,"",true,"5% lower income and 10% higher expenses",ts,ts,"","STRESS","ACTIVE",""],
+      ["scn_lean","Lean",1,0.9,"",true,"10% lower expenses",ts,ts,"","STRESS","ACTIVE",""],
+      ["scn_custom","Custom",1,1,"",true,"User-controlled stress scenario",ts,ts,"","STRESS","ACTIVE",""],
+      ...arrays("spendScenarios").map(x => [x.id,x.name,1,1,"",true,x.notes||"",x.createdAt||ts,ts,"","SPEND",x.status||"DRAFT",x.approvedAt||""])
+    ],
+    ScenarioItems: arrays("scenarioItems").map(x => [x.id,x.scenarioId,x.name,categoryId(x.category,cats),num(x.amount),x.currency||"SAR",x.timing||"ONE_TIME",x.startMonth||"",x.endMonth||"",x.bucket||"nonmonthly",x.notes||"",x.createdAt||ts,ts,"",1])
   };
 
   const clearRanges = Object.keys(data).map(k => RANGE_SPECS[k]);
