@@ -874,6 +874,14 @@ $('focusBtn').onclick=()=>{document.body.classList.toggle('focus-mode');$('focus
 ['openEntryBtn','homeAddBtn','activityAddBtn'].forEach(x=>$(x).onclick=openEntryDrawer);
 ['openWhatIfBtn','homeWhatIfBtn'].forEach(x=>$(x).onclick=()=>goPanel('whatif'));
 $('homeMonthDetailBtn').onclick=()=>goPanel('monthly');
+$('todayOpenMonthBtn').onclick=()=>goPanel('dashboard');
+$('dailySaveBtn').onclick=saveDailyExpense;
+$('dailyMoreBtn').onclick=()=>{$('qType').value='expense';$('qDate').value=$('dailyDate').value;$('qAmount').value=$('dailyAmount').value;$('qCurrency').value=$('dailyCurrency').value;$('qCategory').value=$('dailyCategory').value;$('qName').value=$('dailyName').value;$('qAccount').value=$('dailyAccount').value;openEntryDrawer()};
+$('prevDayBtn').onclick=()=>{const d=addDaysIso($('dailyDate').value,-1);$('dailyDate').value=d<projectStartDate()?projectStartDate():d;$('monthPicker').value=monthOf($('dailyDate').value);renderAll()};
+$('nextDayBtn').onclick=()=>{$('dailyDate').value=addDaysIso($('dailyDate').value,1);$('monthPicker').value=monthOf($('dailyDate').value);renderAll()};
+$('todayDayBtn').onclick=()=>{$('dailyDate').value=projectDefaultDate();$('monthPicker').value=monthOf($('dailyDate').value);renderAll()};
+$('dailyDate').onchange=()=>{if($('dailyDate').value<projectStartDate())$('dailyDate').value=projectStartDate();$('monthPicker').value=monthOf($('dailyDate').value);renderAll()};
+['dailyAmount','dailyCurrency','dailyCategory','dailyAccount','dailyName'].forEach(x=>{const el=$(x);el.addEventListener('input',renderDailyImpact);el.addEventListener('change',renderDailyImpact)});
 $('closeEntryBtn').onclick=closeEntryDrawer;$('entryBackdrop').onclick=closeEntryDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('entryDrawer').classList.contains('open'))closeEntryDrawer()});
 ['qType','qName','qCategory','qDate','qAmount','qCurrency','qAccount','qFx','qRecurring','qFixed'].forEach(x=>{const el=$(x);el.addEventListener('input',renderEntryImpact);el.addEventListener('change',renderEntryImpact)});
