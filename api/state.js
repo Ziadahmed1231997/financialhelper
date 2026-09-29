@@ -61,7 +61,7 @@ async function readState() {
       name: String(r[3]||""), category: categoryName(r[4], cats), accountId: String(r[5]||""),
       amount: num(r[6]), currency: String(r[7]||"SAR").toUpperCase(), fxRate: num(r[8]) || 1,
       sarAmount: num(r[9]), recurringId: String(r[10]||""), status: String(r[11]||"POSTED"),
-      notes: String(r[12]||"")
+      notes: String(r[12]||""), source: String(r[13]||"WEB")
     })),
     recurring: values.Recurring.filter(r => !r[17]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"expense").toLowerCase(),
@@ -145,7 +145,7 @@ async function writeState(state) {
   const data = {
     AppConfig: appConfig,
     Accounts: arrays("accounts").map(a => [a.id,a.name,a.type,a.currency,num(a.balance),num(a.balance),a.includeNetWorth!==false,true,a.notes||"",ts,ts,""]),
-    Transactions: arrays("transactions").map(t => [t.id,t.date,t.type,t.name,categoryId(t.category,cats),t.accountId||"",num(t.amount),t.currency,num(t.fxRate)||1,num(t.sarAmount),t.recurringId||"",t.status||"POSTED",t.notes||"","WEB",ts,ts,"",1]),
+    Transactions: arrays("transactions").map(t => [t.id,t.date,t.type,t.name,categoryId(t.category,cats),t.accountId||"",num(t.amount),t.currency,num(t.fxRate)||1,num(t.sarAmount),t.recurringId||"",t.status||"POSTED",t.notes||"",t.source||"WEB",ts,ts,"",1]),
     Recurring: arrays("recurring").map(r => [r.id,r.name,r.type,categoryId(r.category,cats),r.accountId||"",num(r.amount),r.currency,r.frequency||"monthly",dateFromMonth(r.startMonth),dateFromMonth(r.endMonth),r.fixed!==false,r.active!==false,"",num(r.day)||1,r.notes||"",ts,ts,"",1]),
     RecurringChanges: arrays("changes").map(c => [c.id,c.recurringId,dateFromMonth(c.effectiveMonth),num(c.oldAmount),num(c.newAmount),"",c.reason||"",ts,ts,""]),
     FXRates: arrays("fxRates").map(f => [f.id,dateFromMonth(f.month),"EGP","SAR",num(f.rate),f.note||"Manual","true",ts,ts,""]),
