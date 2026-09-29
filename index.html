@@ -804,6 +804,8 @@ function everydayBudgetSar(month){
 }
 function isEverydayExpense(t,month){
   if(t.type!=='expense'||monthOf(t.date)!==month)return false;
+  const source=String(t.source||'').trim().toUpperCase();
+  if(source==='DAILY_EXPENSE')return true;
   const marker=String(t.notes||'').trim().toLowerCase();
   return marker==='daily expense module'||marker==='daily quick expense'
 }
@@ -850,7 +852,7 @@ function renderToday(){
 async function saveDailyExpense(){
   const amount=n($('dailyAmount').value),date=$('dailyDate').value||projectDefaultDate(),currency=$('dailyCurrency').value,category=$('dailyCategory').value.trim()||'Other Expense',name=$('dailyName').value.trim()||category;
   if(amount<=0)return alert('Enter an amount above zero.');if(date<projectStartDate())return alert('FinanceControl starts on 1 October 2026.');
-  const fx=currency==='EGP'?latestFx(monthOf(date)):1,tx={id:id(),type:'expense',name,category,date,amount,currency,accountId:$('dailyAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Daily expense module'};
+  const fx=currency==='EGP'?latestFx(monthOf(date)):1,tx={id:id(),type:'expense',name,category,date,amount,currency,accountId:$('dailyAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Daily expense module',source:'DAILY_EXPENSE'};
   state.transactions.push(tx);$('monthPicker').value=monthOf(date);const btn=$('dailySaveBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Saving…';
   try{await save(`Daily expense recorded: ${name}`);$('dailyAmount').value='';$('dailyName').value='';$('dailyFeedback').textContent=`${moneyNative(amount,currency)} added`;renderAll();setTimeout(()=>{$('dailyFeedback').textContent=''},1600)}catch(e){state.transactions=state.transactions.filter(x=>x.id!==tx.id)}finally{btn.disabled=false;btn.textContent=old}
 }
