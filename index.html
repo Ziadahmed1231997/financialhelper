@@ -111,7 +111,7 @@ body.focus-mode #quickEntryCard{display:none}
       <button data-panel="settings"><span class="ico">⚙</span>Settings & backup</button>
     </details>
   </div>
-  <div class="side-note">FinanceControl <b>v7</b> · Built around monthly decisions, not database screens.</div>
+  <div class="side-note">FinanceControl <b>v8</b> · Today-first daily spending and monthly control.</div>
 </aside>
 <main>
   <div class="topbar">
@@ -131,7 +131,57 @@ body.focus-mode #quickEntryCard{display:none}
   </div>
   <div id="dataStatus" class="notice good" style="margin-bottom:14px;padding:9px 12px">v5.0 · Connecting to Google Sheets…</div>
 
-  <section class="panel active" id="dashboard">
+  <section class="panel active" id="today">
+    <div class="today-shell">
+      <div class="today-hero">
+        <div class="today-position">
+          <div>
+            <div class="day-nav"><button class="btn hero-secondary" id="prevDayBtn">‹</button><input id="dailyDate" type="date"><button class="btn hero-secondary" id="nextDayBtn">›</button><button class="btn hero-secondary" id="todayDayBtn">Today</button></div>
+            <div class="main-label">Available for everyday spending today</div>
+            <div class="main-value" id="tdRemainingToday">—</div>
+            <div class="main-sub" id="tdRemainingExplain">Your flexible monthly budget converted into a practical daily pace.</div>
+          </div>
+          <div class="today-stats">
+            <div class="today-stat"><span>Spent today</span><b id="tdSpentToday">—</b></div>
+            <div class="today-stat"><span>This week left</span><b id="tdWeekLeft">—</b></div>
+            <div class="today-stat"><span>Month flex left</span><b id="tdMonthFlexLeft">—</b></div>
+          </div>
+        </div>
+        <div class="daily-logger">
+          <h2>Quick daily expense</h2>
+          <div class="hint">Amount first. Category second. Save. Use the full transaction form only when you need more detail.</div>
+          <div class="amount-entry"><input id="dailyAmount" type="number" min="0" step="0.01" placeholder="0.00"><select id="dailyCurrency"><option>SAR</option><option>EGP</option></select></div>
+          <div class="category-chips" id="dailyCategoryChips"></div>
+          <div class="daily-mini-fields">
+            <div class="field"><label>Category</label><input id="dailyCategory" list="categoryList" placeholder="Food & Groceries"></div>
+            <div class="field"><label>Account</label><select id="dailyAccount"></select></div>
+            <div class="field" style="grid-column:1/-1"><label>Merchant / note <span class="muted">(optional)</span></label><input id="dailyName" placeholder="Coffee, supermarket, taxi..."></div>
+          </div>
+          <div class="today-impact" id="dailyImpactPreview">Enter an amount to see how this expense changes today's and this week's allowance.</div>
+          <div class="daily-save-row"><button class="btn primary" id="dailySaveBtn">Add expense</button><button class="btn secondary" id="dailyMoreBtn">More details</button><span class="daily-feedback" id="dailyFeedback"></span></div>
+        </div>
+      </div>
+
+      <div class="pace-grid">
+        <div class="pace-card"><div class="k">Budgeted per day</div><div class="v" id="tdDailyBudget">—</div><div class="s">Flexible monthly budget ÷ calendar days.</div></div>
+        <div class="pace-card"><div class="k">Budgeted per week</div><div class="v" id="tdWeeklyBudget">—</div><div class="s">Daily budget × 7.</div></div>
+        <div class="pace-card"><div class="k">New daily pace</div><div class="v" id="tdAdaptiveDaily">—</div><div class="s" id="tdAdaptiveSub">Remaining flexible budget ÷ remaining days.</div></div>
+        <div class="pace-card"><div class="k">Month pace</div><div class="v" id="tdPaceStatus">—</div><div class="progress"><i id="tdPaceBar" style="width:0%"></i></div><div class="s" id="tdPaceSub">—</div></div>
+      </div>
+
+      <div class="grid two">
+        <div class="card"><div class="section-title"><h3>This week</h3><span id="tdWeekLabel">Sunday–Saturday</span></div><div class="week-strip" id="tdWeekStrip"></div></div>
+        <div class="card"><div class="section-title"><h3>Selected day activity</h3><span id="tdDayActivityCount">—</span></div><div class="today-activity" id="tdDayActivity"></div></div>
+      </div>
+
+      <div class="grid two">
+        <div class="card"><div class="section-title"><h3>Month at a glance</h3><button class="btn soft small" id="todayOpenMonthBtn">Open month view</button></div><div class="kpi-strip"><div class="mini"><div class="k">Income</div><div class="v" id="tdMonthIncome">—</div></div><div class="mini"><div class="k">All spending</div><div class="v" id="tdMonthSpend">—</div></div><div class="mini"><div class="k">Still committed</div><div class="v" id="tdCommitted">—</div></div><div class="mini"><div class="k">Safe to spend</div><div class="v" id="tdSafeSpend">—</div></div></div></div>
+        <div class="card"><div class="section-title"><h3>Everyday spending rule</h3><span>Simple by design</span></div><div class="notice">Daily and weekly allowances use your <b>Flexible</b> category budgets only. Rent, loans, recurring bills, goals, and non-monthly purchases stay reserved separately. Unplanned everyday expenses still reduce your flexible allowance.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="dashboard">
     <div class="home-hero">
       <div class="position-card"><div><div class="eyebrow">Your position this month</div><div class="hero-value" id="dSafeSpend">—</div><div class="hero-copy" id="dSafeSpendSub">Available after recorded spending and remaining commitments</div></div><div><div class="position-grid"><div class="position-mini"><span>Spent</span><b id="dActualExpense">—</b></div><div class="position-mini"><span>Still committed</span><b id="dStillCommitted">—</b></div><div class="position-mini"><span>Month cash flow</span><b id="dActualNet">—</b></div></div><div class="home-actions"><button class="btn hero-primary" id="homeAddBtn">+ Record transaction</button><button class="btn hero-secondary" id="homeWhatIfBtn">Test a purchase</button><button class="btn hero-secondary" id="homeMonthDetailBtn">Detailed month review</button></div></div></div>
       <div class="month-pulse"><div class="pulse-row"><div class="top"><span>Spending vs monthly plan</span><b id="homePlanUse">—</b></div><div class="pulse-track"><i id="homePlanUseBar" style="width:0%"></i></div><div class="sub" id="homePlanUseSub">—</div></div><div class="pulse-row"><div class="top"><span>Income recorded</span><b id="dActualIncome">—</b></div><div class="sub" id="dActualIncomeSub">—</div></div><div class="pulse-row"><div class="top"><span>Liquid cash</span><b id="dLiquidCash">—</b></div><div class="sub" id="dRunwaySub">—</div></div><div class="pulse-row"><div class="top"><span>Cash runway</span><b id="dRunway">—</b></div><div class="sub">Liquid cash compared with recent average spending.</div></div></div>
@@ -290,7 +340,7 @@ body.focus-mode #quickEntryCard{display:none}
 </main>
 </div>
 <script>
-const BUILD='v7.0.0 · Google Sheets';
+const BUILD='v8.0.0 · Google Sheets';
 const $=id=>document.getElementById(id); const n=v=>Number(v)||0; const id=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const today=new Date(); const currentMonth=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`; const isoToday=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 function blank(){return {version:2,settings:{defaultFx:13,reportCurrency:'SAR',projectStartDate:'2026-10-01'},accounts:[],transactions:[],recurring:[],changes:[],budgets:[],goals:[],events:[],fxRates:[],spendScenarios:[],scenarioItems:[]}}
