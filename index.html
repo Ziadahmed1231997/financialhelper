@@ -117,7 +117,7 @@ body.focus-mode #quickEntryCard{display:none}
   <div class="topbar">
     <div><div class="eyebrow">Personal finance command center</div><h1 id="pageTitle">Today</h1><div class="subtitle" id="pageSubtitle">Know what you can spend today and record everyday expenses in seconds.</div></div>
     <div class="toolbar">
-      <div class="month-stepper">
+      <div class="month-stepper" id="globalMonthControl">
         <button class="btn secondary" id="prevMonthBtn" title="Previous month">‹</button>
         <div class="field inline"><label>Month</label><input type="month" id="monthPicker"></div>
         <button class="btn secondary" id="nextMonthBtn" title="Next month">›</button>
@@ -494,7 +494,7 @@ function goPanel(panel){
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===panel));
   const titles={today:'Today',dashboard:'Month',transactions:'Activity',plan:'Plan',whatif:'Decisions',forecast:'Future',accounts:'Accounts',monthly:'Detailed month review',recurring:'Recurring commitments',goals:'Goals',fx:'FX rates',settings:'Settings & backup'};
   const subs={today:'Know what you can spend today and record everyday expenses in seconds.',dashboard:'Your month position, what changed, and what needs attention.',transactions:'Review the money movements already recorded.',plan:'Shape how this month and future months should be spent.',whatif:'Test a purchase or spending option before approving it.',forecast:'See how the approved plan develops over time.',accounts:'Track cash, assets, liabilities and net worth.',monthly:'Deep-dive into one month when you need more detail.',recurring:'Maintain regular income and commitments.',goals:'Manage savings targets and monthly funding.',fx:'Maintain the SAR/EGP assumptions used by the system.',settings:'System defaults, backup and maintenance.'};
-  $('pageTitle').textContent=titles[panel]||panel;$('pageSubtitle').textContent=subs[panel]||'';window.scrollTo({top:0,behavior:'smooth'})
+  $('pageTitle').textContent=titles[panel]||panel;$('pageSubtitle').textContent=subs[panel]||'';$('globalMonthControl').style.display=panel==='today'?'none':'flex';$('openEntryBtn').style.display=panel==='today'?'none':'';window.scrollTo({top:0,behavior:'smooth'})
 }
 function renderNav(){document.querySelectorAll('.nav button[data-panel]').forEach(b=>b.onclick=()=>goPanel(b.dataset.panel))}
 function renderAccountOptions(){const opts='<option value="">Unassigned</option>'+state.accounts.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.currency}</option>`).join(''); ['qAccount','tAccount','rAccount','eAccount','gAccount','dailyAccount'].forEach(idv=>{const el=$(idv),v=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===v))el.value=v})}
