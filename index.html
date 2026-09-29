@@ -241,12 +241,12 @@ body.focus-mode #quickEntryCard{display:none}
       <div class="section-title"><div><h3>Transfer to Egypt</h3><span>Funding requirement for Egypt-linked expenses</span></div><span class="pill" id="egyptTransferFx">—</span></div>
       <div class="notice">This is a <b>funding requirement</b>, not an extra expense. Mark expenses or recurring commitments as “Transfer to Egypt”; FinanceControl will calculate what should be funded in EGP and its SAR equivalent.</div>
       <div class="kpi-strip" style="margin-top:12px">
-        <div class="mini"><div class="k">Planned requirement</div><div class="v" id="egyptPlannedEgp">—</div><div class="muted" id="egyptPlannedSar">—</div></div>
-        <div class="mini"><div class="k">Already covered</div><div class="v" id="egyptCoveredEgp">—</div><div class="muted" id="egyptCoveredSar">—</div></div>
-        <div class="mini"><div class="k">Remaining to transfer</div><div class="v" id="egyptRemainingEgp">—</div><div class="muted" id="egyptRemainingSar">—</div></div>
-        <div class="mini"><div class="k">One-off actuals</div><div class="v" id="egyptOneOffEgp">—</div><div class="muted" id="egyptOneOffSar">—</div></div>
+        <div class="mini"><div class="k">Recurring requirement</div><div class="v" id="egyptPlannedEgp">—</div><div class="muted" id="egyptPlannedSar">—</div></div>
+        <div class="mini"><div class="k">Marked one-offs</div><div class="v" id="egyptCoveredEgp">—</div><div class="muted" id="egyptCoveredSar">—</div></div>
+        <div class="mini"><div class="k">Total transfer plan</div><div class="v" id="egyptRemainingEgp">—</div><div class="muted">Amount to fund in Egypt</div></div>
+        <div class="mini"><div class="k">SAR equivalent</div><div class="v" id="egyptOneOffEgp">—</div><div class="muted" id="egyptOneOffSar">—</div></div>
       </div>
-      <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Recurring Egypt expense</th><th class="num">Planned</th><th class="num">Required EGP</th><th class="num">Covered</th><th class="num">Remaining</th></tr></thead><tbody id="egyptTransferTable"></tbody></table></div>
+      <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Egypt-linked expense</th><th>Source</th><th class="num">Original</th><th class="num">Required EGP</th><th class="num">SAR equivalent</th></tr></thead><tbody id="egyptTransferTable"></tbody></table></div>
     </div>
     <div class="card" style="margin-top:14px"><div class="section-title"><h3>Add category budget</h3><span>For flexible or non-monthly spending</span></div><div class="grid form-grid"><div class="field"><label>Category</label><input id="bCategory" list="categoryList" placeholder="Groceries"></div><div class="field"><label>Bucket</label><select id="bBucket"><option value="flex">Flexible</option><option value="nonmonthly">Non-monthly</option></select></div><div class="field"><label>Monthly amount</label><input id="bAmount" type="number" min="0" step="0.01"></div><div class="field"><label>Currency</label><select id="bCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Start month</label><input id="bStart" type="month"></div><div class="field"><label>Schedule</label><select id="bMode"><option value="ongoing">Ongoing from start month</option><option value="month">This month only</option><option value="range">Custom month range</option></select></div><div class="field"><label>End month (range only)</label><input id="bEnd" type="month"></div><div class="field"><label>Rollover?</label><select id="bRollover"><option value="no">No</option><option value="yes">Yes</option></select></div></div><div class="form-actions"><button class="btn primary" id="addBudgetBtn">Add budget</button><button class="btn soft" id="estimateBudgetsBtn">Suggest from history</button></div></div>
     <div class="card" style="margin-top:14px"><div class="section-title"><h3>Category budgets</h3><span id="budgetCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Category</th><th>Bucket</th><th>Schedule</th><th>Starts</th><th>Ends</th><th>Rollover</th><th class="num">Budget</th><th class="num">Actual</th><th class="num">Remaining</th><th></th></tr></thead><tbody id="budgetTable"></tbody></table></div></div>
@@ -687,24 +687,19 @@ function egyptFunding(month){
   const txs=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month);
   const recurring=state.recurring.filter(r=>r.type==='expense'&&r.transferToEgypt&&recurringApplies(r,month));
   const recurringNames=new Set(recurring.map(r=>String(r.name||'').trim().toLowerCase()));
-  const lines=recurring.map(r=>{
-    const plannedSar=recurringMonthlySar(r,month),key=String(r.name||'').trim().toLowerCase();
-    const actualSar=txs.filter(t=>String(t.name||'').trim().toLowerCase()===key).reduce((sum,t)=>sum+transactionSar(t),0);
-    const coveredSar=Math.min(plannedSar,actualSar),remainingSar=Math.max(0,plannedSar-coveredSar);
-    return {r,plannedSar,coveredSar,remainingSar,plannedEgp:plannedSar*fx,coveredEgp:coveredSar*fx,remainingEgp:remainingSar*fx}
-  });
-  const plannedSar=lines.reduce((s,x)=>s+x.plannedSar,0),coveredSar=lines.reduce((s,x)=>s+x.coveredSar,0),remainingSar=lines.reduce((s,x)=>s+x.remainingSar,0);
-  const oneOffActualSar=txs.filter(t=>t.transferToEgypt&&!recurringNames.has(String(t.name||'').trim().toLowerCase())).reduce((s,t)=>s+transactionSar(t),0);
-  return {fx,lines,plannedSar,coveredSar,remainingSar,oneOffActualSar,plannedEgp:plannedSar*fx,coveredEgp:coveredSar*fx,remainingEgp:remainingSar*fx,oneOffActualEgp:oneOffActualSar*fx}
+  const recurringLines=recurring.map(r=>{const sar=recurringMonthlySar(r,month);return {kind:'Recurring',name:r.name,category:r.category||'Other',original:moneyNative(recurringAmount(r,month),r.currency),sar,egp:sar*fx}});
+  const oneOffLines=txs.filter(t=>t.transferToEgypt&&!recurringNames.has(String(t.name||'').trim().toLowerCase())).map(t=>{const sar=transactionSar(t);return {kind:'Transaction',name:t.name,category:t.category||'Other',original:moneyNative(t.amount,t.currency),sar,egp:sar*fx}});
+  const recurringSar=recurringLines.reduce((sum,x)=>sum+x.sar,0),oneOffSar=oneOffLines.reduce((sum,x)=>sum+x.sar,0),totalSar=recurringSar+oneOffSar;
+  return {fx,recurringLines,oneOffLines,lines:[...recurringLines,...oneOffLines],recurringSar,oneOffSar,totalSar,recurringEgp:recurringSar*fx,oneOffEgp:oneOffSar*fx,totalEgp:totalSar*fx}
 }
 function renderEgyptFunding(month){
   const x=egyptFunding(month);
   $('egyptTransferFx').textContent=`FX ${x.fx.toFixed(2)} EGP/SAR`;
-  $('egyptPlannedEgp').textContent=moneyNative(x.plannedEgp,'EGP');$('egyptPlannedSar').textContent=`≈ ${moneyNative(x.plannedSar,'SAR')}`;
-  $('egyptCoveredEgp').textContent=moneyNative(x.coveredEgp,'EGP');$('egyptCoveredSar').textContent=`≈ ${moneyNative(x.coveredSar,'SAR')}`;
-  $('egyptRemainingEgp').textContent=moneyNative(x.remainingEgp,'EGP');$('egyptRemainingSar').textContent=`≈ ${moneyNative(x.remainingSar,'SAR')}`;
-  $('egyptOneOffEgp').textContent=moneyNative(x.oneOffActualEgp,'EGP');$('egyptOneOffSar').textContent=`≈ ${moneyNative(x.oneOffActualSar,'SAR')}`;
-  $('egyptTransferTable').innerHTML=x.lines.length?x.lines.map(v=>`<tr><td><strong>${esc(v.r.name)}</strong><div class="muted">${esc(v.r.category||'Other')} · ${moneyNative(recurringAmount(v.r,month),v.r.currency)}</div></td><td class="num">${moneyNative(v.plannedSar,'SAR')}</td><td class="num">${moneyNative(v.plannedEgp,'EGP')}</td><td class="num">${moneyNative(v.coveredEgp,'EGP')}</td><td class="num ${v.remainingEgp>0?'negative':'positive'}">${moneyNative(v.remainingEgp,'EGP')}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No recurring expenses are marked “Transfer to Egypt” for this month.</td></tr>'
+  $('egyptPlannedEgp').textContent=moneyNative(x.recurringEgp,'EGP');$('egyptPlannedSar').textContent=`≈ ${moneyNative(x.recurringSar,'SAR')}`;
+  $('egyptCoveredEgp').textContent=moneyNative(x.oneOffEgp,'EGP');$('egyptCoveredSar').textContent=`≈ ${moneyNative(x.oneOffSar,'SAR')}`;
+  $('egyptRemainingEgp').textContent=moneyNative(x.totalEgp,'EGP');$('egyptRemainingSar').textContent='';
+  $('egyptOneOffEgp').textContent=moneyNative(x.totalSar,'SAR');$('egyptOneOffSar').textContent=`at ${x.fx.toFixed(2)} EGP/SAR`;
+  $('egyptTransferTable').innerHTML=x.lines.length?x.lines.map(v=>`<tr><td><strong>${esc(v.name)}</strong><div class="muted">${esc(v.category)}</div></td><td>${v.kind}</td><td class="num">${v.original}</td><td class="num">${moneyNative(v.egp,'EGP')}</td><td class="num">${moneyNative(v.sar,'SAR')}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No expenses are marked “Transfer to Egypt” for this month.</td></tr>'
 }
 function toggleEgyptTransaction(idv){
   const t=state.transactions.find(x=>x.id===idv);if(!t||t.type!=='expense')return;
