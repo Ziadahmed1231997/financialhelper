@@ -784,13 +784,78 @@ function renderEntryImpact(){
   $('entryCategoryBefore').textContent=`Before ${moneySar(beforeCat,month)}`;$('entryCategoryAfter').textContent=`After ${moneySar(afterCat,month)}`;$('entryCategoryBar').style.width=`${Math.min(100,pct)}%`;
   $('entryImpactNote').innerHTML=catPlan?(afterCat>catPlan?`This would put <b>${esc(category)}</b> ${moneySar(afterCat-catPlan,month)} over its current plan.`:`After this transaction, <b>${esc(category)}</b> would have ${moneySar(catPlan-afterCat,month)} left in its current plan.`):`There is no monthly plan for <b>${esc(category)}</b>. The transaction will still affect actual cash flow and safe-to-spend.`;
 }
+
+function dateParts(date){const [y,m,d]=String(date||'').slice(0,10).split('-').map(Number);return {y,m,d}}
+function isoFromParts(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function addDaysIso(date,delta){const p=dateParts(date),dt=new Date(Date.UTC(p.y,p.m-1,p.d+delta));return isoFromParts(dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate())}
+function daysInMonth(month){const [y,m]=month.split('-').map(Number);return new Date(Date.UTC(y,m,0)).getUTCDate()}
+function sundayOf(date){const p=dateParts(date),dt=new Date(Date.UTC(p.y,p.m-1,p.d)),dow=dt.getUTCDay();return addDaysIso(date,-dow)}
+function flexibleBudgetSar(month){return state.budgets.filter(b=>b.bucket==='flex'&&activeBudget(b,month)).reduce((sum,b)=>sum+budgetAvailableSar(b,month),0)}
+function isEverydayExpense(t,month){
+  if(t.type!=='expense'||monthOf(t.date)!==month)return false;
+  const fixedNames=new Set(state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).map(r=>String(r.name||'').trim().toLowerCase()));
+  if(fixedNames.has(String(t.name||'').trim().toLowerCase()))return false;
+  const nonmonthlyCats=new Set(state.budgets.filter(b=>b.bucket==='nonmonthly'&&activeBudget(b,month)).map(b=>b.category));
+  if(nonmonthlyCats.has(t.category))return false;
+  if(String(t.category||'').toLowerCase().includes('saving'))return false;
+  return true
+}
+function everydaySpendRange(start,end){
+  const month=monthOf(start);
+  return state.transactions.filter(t=>isEverydayExpense(t,month)&&t.date>=start&&t.date<=end).reduce((sum,t)=>sum+transactionSar(t),0)
+}
+function everydayPace(date){
+  const month=monthOf(date),dim=daysInMonth(month),p=dateParts(date),start=`${month}-01`,weekStart=sundayOf(date),weekEnd=addDaysIso(weekStart,6);
+  const flex=flexibleBudgetSar(month),daily=dim?flex/dim:0,weekly=daily*7,daySpent=everydaySpendRange(date,date),weekSpent=everydaySpendRange(weekStart,weekEnd),monthSpent=everydaySpendRange(start,date);
+  const remaining=flex-monthSpent,remainingDays=Math.max(1,dim-p.d+1),adaptive=Math.max(0,remaining)/remainingDays,expected=daily*p.d,variance=monthSpent-expected;
+  return {month,flex,daily,weekly,daySpent,weekSpent,monthSpent,dayLeft:daily-daySpent,weekLeft:weekly-weekSpent,remaining,remainingDays,adaptive,expected,variance,weekStart,weekEnd,dim}
+}
+function renderDailyCategoryChips(){
+  const month=monthOf($('dailyDate').value||projectDefaultDate()),planned=state.budgets.filter(b=>b.bucket==='flex'&&activeBudget(b,month)).map(b=>b.category),recent=[...state.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.date.localeCompare(a.date)).map(t=>t.category);
+  const cats=[...new Set([...planned,...recent,'Food & Groceries','Transport','Other Expense'].filter(Boolean))].slice(0,7);
+  const current=$('dailyCategory').value.trim();
+  $('dailyCategoryChips').innerHTML=cats.map(cat=>`<button type="button" class="category-chip ${current===cat?'active':''}" data-dailycat="${esc(cat)}">${esc(cat)}</button>`).join('');
+  document.querySelectorAll('[data-dailycat]').forEach(btn=>btn.onclick=()=>{$('dailyCategory').value=btn.dataset.dailycat;renderDailyCategoryChips();renderDailyImpact()});
+  if(!current&&cats.length)$('dailyCategory').value=cats[0];
+}
+function renderDailyImpact(){
+  const date=$('dailyDate').value||projectDefaultDate(),pace=everydayPace(date),amount=n($('dailyAmount').value),currency=$('dailyCurrency').value,delta=amount>0?toSAR(amount,currency,monthOf(date)):0;
+  if(!pace.flex){$('dailyImpactPreview').innerHTML='No flexible monthly budget is set for this month yet. You can still record the expense, but daily/weekly allowance calculations need at least one <b>Flexible</b> budget in Plan.';return}
+  if(!amount){$('dailyImpactPreview').innerHTML=`Today you have <b>${moneySar(pace.dayLeft,pace.month)}</b> left from the base daily budget and <b>${moneySar(pace.weekLeft,pace.month)}</b> left for this week.`;return}
+  const dayAfter=pace.dayLeft-delta,weekAfter=pace.weekLeft-delta,monthAfter=pace.remaining-delta;
+  $('dailyImpactPreview').innerHTML=`After this expense: today <b>${moneySar(dayAfter,pace.month)}</b> remaining · week <b>${moneySar(weekAfter,pace.month)}</b> remaining · flexible month budget <b>${moneySar(monthAfter,pace.month)}</b> remaining.`;
+}
+function renderToday(){
+  const date=$('dailyDate').value||projectDefaultDate(),pace=everydayPace(date),month=pace.month,control=monthControl(month),actual=monthlyActual(month);
+  $('tdDailyBudget').textContent=pace.flex?moneySar(pace.daily,month):'—';$('tdWeeklyBudget').textContent=pace.flex?moneySar(pace.weekly,month):'—';$('tdSpentToday').textContent=moneySar(pace.daySpent,month);$('tdWeekLeft').textContent=pace.flex?moneySar(pace.weekLeft,month):'—';$('tdMonthFlexLeft').textContent=pace.flex?moneySar(pace.remaining,month):'—';$('tdAdaptiveDaily').textContent=pace.flex?moneySar(pace.adaptive,month):'—';
+  $('tdRemainingToday').textContent=pace.flex?moneySar(pace.dayLeft,month):'Set a flex budget';$('tdRemainingExplain').textContent=pace.flex?(pace.dayLeft<0?'You are over the base daily allowance. The new daily pace below adjusts the rest of the month.':'Base daily allowance less everyday spending recorded for this date.'):'Create at least one Flexible budget in Plan to activate daily and weekly allowances.';
+  $('tdAdaptiveSub').textContent=pace.flex?`${moneySar(Math.max(0,pace.remaining),month)} flexible budget left across ${pace.remainingDays} remaining day${pace.remainingDays===1?'':'s'}.`:'Remaining budget ÷ remaining days.';
+  const status=!pace.flex?'No budget':pace.variance>pace.daily*.25?'Over pace':pace.variance<-pace.daily*.25?'Under pace':'On pace';
+  $('tdPaceStatus').textContent=status;const pct=pace.flex?Math.min(100,Math.max(0,pace.monthSpent/pace.flex*100)):0;$('tdPaceBar').style.width=`${pct}%`;$('tdPaceSub').textContent=pace.flex?`${moneySar(pace.monthSpent,month)} everyday spend recorded vs ${moneySar(pace.flex,month)} flexible budget.`:'Add a flexible budget to start pacing.';
+  $('tdMonthIncome').textContent=moneySar(actual.income,month);$('tdMonthSpend').textContent=moneySar(actual.expense,month);$('tdCommitted').textContent=moneySar(control.committed,month);$('tdSafeSpend').textContent=moneySar(control.safe,month);
+  const weekDays=Array.from({length:7},(_,i)=>addDaysIso(pace.weekStart,i));
+  $('tdWeekLabel').textContent=`${weekDays[0]} → ${weekDays[6]}`;
+  $('tdWeekStrip').innerHTML=weekDays.map(d=>{const spent=everydaySpendRange(d,d),dp=dateParts(d),wd=new Date(Date.UTC(dp.y,dp.m-1,dp.d)).toLocaleDateString(undefined,{weekday:'short',timeZone:'UTC'}),bar=pace.daily?Math.min(100,spent/pace.daily*100):0;return `<div class="week-day ${d===date?'selected':''}"><div class="d">${wd}</div><div class="n">${dp.d}</div><div class="amt">${moneySar(spent,month)}</div><div class="bar"><i style="width:${bar}%"></i></div></div>`}).join('');
+  const dayRows=state.transactions.filter(t=>t.date===date).sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+  $('tdDayActivityCount').textContent=`${dayRows.length} entr${dayRows.length===1?'y':'ies'}`;
+  $('tdDayActivity').innerHTML=dayRows.length?dayRows.map(t=>`<div class="today-tx"><div><div class="name">${esc(t.name)}</div><div class="sub">${esc(t.category)} · ${esc(accountName(t.accountId))}</div></div><div class="amt ${t.type==='expense'?'negative':'positive'}">${t.type==='expense'?'-':'+'}${moneyNative(t.amount,t.currency)}</div></div>`).join(''):'<div class="empty">Nothing recorded for this day.</div>';
+  renderDailyCategoryChips();renderDailyImpact()
+}
+async function saveDailyExpense(){
+  const amount=n($('dailyAmount').value),date=$('dailyDate').value||projectDefaultDate(),currency=$('dailyCurrency').value,category=$('dailyCategory').value.trim()||'Other Expense',name=$('dailyName').value.trim()||category;
+  if(amount<=0)return alert('Enter an amount above zero.');if(date<projectStartDate())return alert('FinanceControl starts on 1 October 2026.');
+  const fx=currency==='EGP'?latestFx(monthOf(date)):1,tx={id:id(),type:'expense',name,category,date,amount,currency,accountId:$('dailyAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Daily quick expense'};
+  state.transactions.push(tx);$('monthPicker').value=monthOf(date);const btn=$('dailySaveBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Saving…';
+  try{await save(`Daily expense recorded: ${name}`);$('dailyAmount').value='';$('dailyName').value='';$('dailyFeedback').textContent=`${moneyNative(amount,currency)} added`;renderAll();setTimeout(()=>{$('dailyFeedback').textContent=''},1600)}catch(e){state.transactions=state.transactions.filter(x=>x.id!==tx.id)}finally{btn.disabled=false;btn.textContent=old}
+}
+
 function renderHomeExperience(){
   const m=$('monthPicker').value,p=monthlyPlan(m),a=monthlyActual(m),use=p.out?a.expense/p.out*100:0;
   $('homePlanUse').textContent=p.out?`${use.toFixed(0)}%`:'No plan';$('homePlanUseBar').style.width=`${Math.min(100,use)}%`;
   $('homePlanUseSub').textContent=p.out?`${moneySar(a.expense,m)} recorded against ${moneySar(p.out,m)} planned outflow.`:'Add recurring commitments or category budgets to build a monthly plan.';
 }
 
-function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderDecisionStrip,renderDashboard,renderHomeExperience,renderMonthlyReview,renderPlan,renderRecurring,renderWhatIf,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
+function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderToday,renderDecisionStrip,renderDashboard,renderHomeExperience,renderMonthlyReview,renderPlan,renderRecurring,renderWhatIf,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
 function removeItem(type,idv){if(!confirm('Delete this record?'))return;state[type]=state[type].filter(x=>x.id!==idv);if(type==='recurring')state.changes=state.changes.filter(x=>x.recurringId!==idv);save()}
 function promoteTransaction(idv){const t=state.transactions.find(x=>x.id===idv);if(!t)return; $('rType').value=t.type==='income'?'income':'expense';$('rName').value=t.name;$('rCategory').value=t.category;$('rAmount').value=t.amount;$('rCurrency').value=t.currency;$('rAccount').value=t.accountId||'';$('rStart').value=monthOf(t.date);document.querySelector('[data-panel="recurring"]').click();window.scrollTo({top:0,behavior:'smooth'})}
 function changeRecurringAmount(idv){const r=state.recurring.find(x=>x.id===idv);if(!r)return;const month=prompt('Effective month (YYYY-MM):',$('monthPicker').value);if(!month||!/^[0-9]{4}-[0-9]{2}$/.test(month))return;if(month<projectStartMonth())return alert('Recurring changes cannot be effective before October 2026.');const old=recurringAmount(r,month),val=prompt(`New amount (${r.currency}). Current: ${old}`,String(old));if(val===null||n(val)<=0)return;const reason=prompt('Reason for change (optional):','')||'';state.changes.push({id:id(),recurringId:r.id,effectiveMonth:month,oldAmount:old,newAmount:n(val),reason});save()}
