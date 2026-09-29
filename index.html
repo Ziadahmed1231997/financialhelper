@@ -166,7 +166,7 @@ body.focus-mode #quickEntryCard{display:none}
       </div>
 
       <div class="pace-grid">
-        <div class="pace-card"><div class="k">Budgeted per day</div><div class="v" id="tdDailyBudget">—</div><div class="s">Flexible monthly budget ÷ calendar days.</div></div>
+        <div class="pace-card"><div class="k">Budgeted per day</div><div class="v" id="tdDailyBudget">—</div><div class="s">Daily module budget ÷ calendar days.</div></div>
         <div class="pace-card"><div class="k">Budgeted per week</div><div class="v" id="tdWeeklyBudget">—</div><div class="s">Daily budget × 7.</div></div>
         <div class="pace-card"><div class="k">New daily pace</div><div class="v" id="tdAdaptiveDaily">—</div><div class="s" id="tdAdaptiveSub">Remaining flexible budget ÷ remaining days.</div></div>
         <div class="pace-card"><div class="k">Month pace</div><div class="v" id="tdPaceStatus">—</div><div class="progress"><i id="tdPaceBar" style="width:0%"></i></div><div class="s" id="tdPaceSub">—</div></div>
@@ -179,7 +179,7 @@ body.focus-mode #quickEntryCard{display:none}
 
       <div class="grid two">
         <div class="card"><div class="section-title"><h3>Month at a glance</h3><button class="btn soft small" id="todayOpenMonthBtn">Open month view</button></div><div class="kpi-strip"><div class="mini"><div class="k">Income</div><div class="v" id="tdMonthIncome">—</div></div><div class="mini"><div class="k">All spending</div><div class="v" id="tdMonthSpend">—</div></div><div class="mini"><div class="k">Still committed</div><div class="v" id="tdCommitted">—</div></div><div class="mini"><div class="k">Safe to spend</div><div class="v" id="tdSafeSpend">—</div></div></div></div>
-        <div class="card"><div class="section-title"><h3>Everyday spending rule</h3><span>Simple by design</span></div><div class="notice">Daily and weekly allowances use your <b>Flexible</b> category budgets only. Rent, loans, recurring bills, goals, and non-monthly purchases stay reserved separately. Unplanned everyday expenses still reduce your flexible allowance.</div></div>
+        <div class="card"><div class="section-title"><h3>Everyday spending rule</h3><span>Simple by design</span></div><div class="notice">Daily and weekly allowance usage counts <b>only expenses recorded through this Daily Expense module</b>. Normal transactions remain part of your monthly cash flow but do not consume the daily-spending allowance.</div></div>
       </div>
     </div>
   </section>
@@ -804,13 +804,8 @@ function everydayBudgetSar(month){
 }
 function isEverydayExpense(t,month){
   if(t.type!=='expense'||monthOf(t.date)!==month)return false;
-  const fixedNames=new Set(state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).map(r=>String(r.name||'').trim().toLowerCase()));
-  if(fixedNames.has(String(t.name||'').trim().toLowerCase()))return false;
-  const nonmonthlyCats=new Set(state.budgets.filter(b=>b.bucket==='nonmonthly'&&activeBudget(b,month)).map(b=>b.category));
-  if(nonmonthlyCats.has(t.category))return false;
-  const cat=String(t.category||'').trim().toLowerCase();
-  if(['debt','housing','insurance','subscriptions','utilities','savings / goal funding'].includes(cat)||cat.includes('saving'))return false;
-  return true
+  const marker=String(t.notes||'').trim().toLowerCase();
+  return marker==='daily expense module'||marker==='daily quick expense'
 }
 function everydaySpendRange(start,end){
   return state.transactions.filter(t=>t.date>=start&&t.date<=end&&isEverydayExpense(t,monthOf(t.date))).reduce((sum,t)=>sum+transactionSar(t),0)
@@ -855,7 +850,7 @@ function renderToday(){
 async function saveDailyExpense(){
   const amount=n($('dailyAmount').value),date=$('dailyDate').value||projectDefaultDate(),currency=$('dailyCurrency').value,category=$('dailyCategory').value.trim()||'Other Expense',name=$('dailyName').value.trim()||category;
   if(amount<=0)return alert('Enter an amount above zero.');if(date<projectStartDate())return alert('FinanceControl starts on 1 October 2026.');
-  const fx=currency==='EGP'?latestFx(monthOf(date)):1,tx={id:id(),type:'expense',name,category,date,amount,currency,accountId:$('dailyAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Daily quick expense'};
+  const fx=currency==='EGP'?latestFx(monthOf(date)):1,tx={id:id(),type:'expense',name,category,date,amount,currency,accountId:$('dailyAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Daily expense module'};
   state.transactions.push(tx);$('monthPicker').value=monthOf(date);const btn=$('dailySaveBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Saving…';
   try{await save(`Daily expense recorded: ${name}`);$('dailyAmount').value='';$('dailyName').value='';$('dailyFeedback').textContent=`${moneyNative(amount,currency)} added`;renderAll();setTimeout(()=>{$('dailyFeedback').textContent=''},1600)}catch(e){state.transactions=state.transactions.filter(x=>x.id!==tx.id)}finally{btn.disabled=false;btn.textContent=old}
 }
