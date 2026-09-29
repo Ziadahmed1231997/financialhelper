@@ -792,6 +792,12 @@ function addDaysIso(date,delta){const p=dateParts(date),dt=new Date(Date.UTC(p.y
 function daysInMonth(month){const [y,m]=month.split('-').map(Number);return new Date(Date.UTC(y,m,0)).getUTCDate()}
 function sundayOf(date){const p=dateParts(date),dt=new Date(Date.UTC(p.y,p.m-1,p.d)),dow=dt.getUTCDay();return addDaysIso(date,-dow)}
 function flexibleBudgetSar(month){return state.budgets.filter(b=>b.bucket==='flex'&&activeBudget(b,month)).reduce((sum,b)=>sum+budgetAvailableSar(b,month),0)}
+function everydayBudgetSar(month){
+  const explicit=flexibleBudgetSar(month);
+  if(explicit>0)return {amount:explicit,source:'Flexible category budgets'};
+  const p=monthlyPlan(month),fallback=Math.max(0,p.income-p.fixed-p.nonmonthly-p.goals-p.eventExpense);
+  return {amount:fallback,source:fallback>0?'Unallocated income after commitments':'No everyday budget available'}
+}
 function isEverydayExpense(t,month){
   if(t.type!=='expense'||monthOf(t.date)!==month)return false;
   const fixedNames=new Set(state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).map(r=>String(r.name||'').trim().toLowerCase()));
@@ -802,14 +808,13 @@ function isEverydayExpense(t,month){
   return true
 }
 function everydaySpendRange(start,end){
-  const month=monthOf(start);
-  return state.transactions.filter(t=>isEverydayExpense(t,month)&&t.date>=start&&t.date<=end).reduce((sum,t)=>sum+transactionSar(t),0)
+  return state.transactions.filter(t=>t.date>=start&&t.date<=end&&isEverydayExpense(t,monthOf(t.date))).reduce((sum,t)=>sum+transactionSar(t),0)
 }
 function everydayPace(date){
   const month=monthOf(date),dim=daysInMonth(month),p=dateParts(date),start=`${month}-01`,weekStart=sundayOf(date),weekEnd=addDaysIso(weekStart,6);
-  const flex=flexibleBudgetSar(month),daily=dim?flex/dim:0,weekly=daily*7,daySpent=everydaySpendRange(date,date),weekSpent=everydaySpendRange(weekStart,weekEnd),monthSpent=everydaySpendRange(start,date);
+  const envelope=everydayBudgetSar(month),flex=envelope.amount,daily=dim?flex/dim:0,weekly=daily*7,daySpent=everydaySpendRange(date,date),weekSpent=everydaySpendRange(weekStart,weekEnd),monthSpent=everydaySpendRange(start,date);
   const remaining=flex-monthSpent,remainingDays=Math.max(1,dim-p.d+1),adaptive=Math.max(0,remaining)/remainingDays,expected=daily*p.d,variance=monthSpent-expected;
-  return {month,flex,daily,weekly,daySpent,weekSpent,monthSpent,dayLeft:daily-daySpent,weekLeft:weekly-weekSpent,remaining,remainingDays,adaptive,expected,variance,weekStart,weekEnd,dim}
+  return {month,flex,source:envelope.source,daily,weekly,daySpent,weekSpent,monthSpent,dayLeft:daily-daySpent,weekLeft:weekly-weekSpent,remaining,remainingDays,adaptive,expected,variance,weekStart,weekEnd,dim}
 }
 function renderDailyCategoryChips(){
   const month=monthOf($('dailyDate').value||projectDefaultDate()),planned=state.budgets.filter(b=>b.bucket==='flex'&&activeBudget(b,month)).map(b=>b.category),recent=[...state.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.date.localeCompare(a.date)).map(t=>t.category);
@@ -829,14 +834,14 @@ function renderDailyImpact(){
 function renderToday(){
   const date=$('dailyDate').value||projectDefaultDate(),pace=everydayPace(date),month=pace.month,control=monthControl(month),actual=monthlyActual(month);
   $('tdDailyBudget').textContent=pace.flex?moneySar(pace.daily,month):'—';$('tdWeeklyBudget').textContent=pace.flex?moneySar(pace.weekly,month):'—';$('tdSpentToday').textContent=moneySar(pace.daySpent,month);$('tdWeekLeft').textContent=pace.flex?moneySar(pace.weekLeft,month):'—';$('tdMonthFlexLeft').textContent=pace.flex?moneySar(pace.remaining,month):'—';$('tdAdaptiveDaily').textContent=pace.flex?moneySar(pace.adaptive,month):'—';
-  $('tdRemainingToday').textContent=pace.flex?moneySar(pace.dayLeft,month):'Set a flex budget';$('tdRemainingExplain').textContent=pace.flex?(pace.dayLeft<0?'You are over the base daily allowance. The new daily pace below adjusts the rest of the month.':'Base daily allowance less everyday spending recorded for this date.'):'Create at least one Flexible budget in Plan to activate daily and weekly allowances.';
+  $('tdRemainingToday').textContent=pace.flex?moneySar(pace.dayLeft,month):'Set a flex budget';$('tdRemainingExplain').textContent=pace.flex?(pace.dayLeft<0?`You are over the base daily allowance. The new daily pace adjusts the rest of the month · ${pace.source}.`:`Base daily allowance less everyday spending recorded for this date · ${pace.source}.`):'Add planned income and commitments, or a Flexible budget, to activate daily and weekly allowances.';
   $('tdAdaptiveSub').textContent=pace.flex?`${moneySar(Math.max(0,pace.remaining),month)} flexible budget left across ${pace.remainingDays} remaining day${pace.remainingDays===1?'':'s'}.`:'Remaining budget ÷ remaining days.';
   const status=!pace.flex?'No budget':pace.variance>pace.daily*.25?'Over pace':pace.variance<-pace.daily*.25?'Under pace':'On pace';
   $('tdPaceStatus').textContent=status;const pct=pace.flex?Math.min(100,Math.max(0,pace.monthSpent/pace.flex*100)):0;$('tdPaceBar').style.width=`${pct}%`;$('tdPaceSub').textContent=pace.flex?`${moneySar(pace.monthSpent,month)} everyday spend recorded vs ${moneySar(pace.flex,month)} flexible budget.`:'Add a flexible budget to start pacing.';
   $('tdMonthIncome').textContent=moneySar(actual.income,month);$('tdMonthSpend').textContent=moneySar(actual.expense,month);$('tdCommitted').textContent=moneySar(control.committed,month);$('tdSafeSpend').textContent=moneySar(control.safe,month);
   const weekDays=Array.from({length:7},(_,i)=>addDaysIso(pace.weekStart,i));
   $('tdWeekLabel').textContent=`${weekDays[0]} → ${weekDays[6]}`;
-  $('tdWeekStrip').innerHTML=weekDays.map(d=>{const spent=everydaySpendRange(d,d),dp=dateParts(d),wd=new Date(Date.UTC(dp.y,dp.m-1,dp.d)).toLocaleDateString(undefined,{weekday:'short',timeZone:'UTC'}),bar=pace.daily?Math.min(100,spent/pace.daily*100):0;return `<div class="week-day ${d===date?'selected':''}"><div class="d">${wd}</div><div class="n">${dp.d}</div><div class="amt">${moneySar(spent,month)}</div><div class="bar"><i style="width:${bar}%"></i></div></div>`}).join('');
+  $('tdWeekStrip').innerHTML=weekDays.map(d=>{const spent=everydaySpendRange(d,d),dp=dateParts(d),wd=new Date(Date.UTC(dp.y,dp.m-1,dp.d)).toLocaleDateString(undefined,{weekday:'short',timeZone:'UTC'}),bar=pace.daily?Math.min(100,spent/pace.daily*100):0;return `<div class="week-day ${d===date?'selected':''}"><div class="d">${wd}</div><div class="n">${dp.d}</div><div class="amt">${moneySar(spent,monthOf(d))}</div><div class="bar"><i style="width:${bar}%"></i></div></div>`}).join('');
   const dayRows=state.transactions.filter(t=>t.date===date).sort((a,b)=>String(b.id).localeCompare(String(a.id)));
   $('tdDayActivityCount').textContent=`${dayRows.length} entr${dayRows.length===1?'y':'ies'}`;
   $('tdDayActivity').innerHTML=dayRows.length?dayRows.map(t=>`<div class="today-tx"><div><div class="name">${esc(t.name)}</div><div class="sub">${esc(t.category)} · ${esc(accountName(t.accountId))}</div></div><div class="amt ${t.type==='expense'?'negative':'positive'}">${t.type==='expense'?'-':'+'}${moneyNative(t.amount,t.currency)}</div></div>`).join(''):'<div class="empty">Nothing recorded for this day.</div>';
