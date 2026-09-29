@@ -46,7 +46,8 @@ async function readState() {
     version: 5,
     settings: {
       defaultFx: num(config.default_fx_egp_per_sar) || 13,
-      reportCurrency: config.reporting_currency || "SAR"
+      reportCurrency: config.reporting_currency || "SAR",
+      projectStartDate: config.project_start_date || "2026-10-01"
     },
     accounts: values.Accounts.filter(r => !r[11]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"checking").toLowerCase(),
@@ -100,6 +101,18 @@ async function writeState(state) {
   const s = state || {};
   const settings = s.settings || {};
   const arrays = k => Array.isArray(s[k]) ? s[k] : [];
+  const projectStartDate = settings.projectStartDate || current.state?.settings?.projectStartDate || "2026-10-01";
+  const projectStartMonth = month(projectStartDate);
+  const beforeStartDate = v => v && String(v).slice(0,10) < projectStartDate;
+  const beforeStartMonth = v => v && month(v) < projectStartMonth;
+  const invalid = [];
+  arrays("transactions").forEach(x => { if (beforeStartDate(x.date)) invalid.push(`Transaction "${x.name||x.id}" is before project start`); });
+  arrays("recurring").forEach(x => { if (beforeStartMonth(x.startMonth)) invalid.push(`Recurring item "${x.name||x.id}" starts before project start`); });
+  arrays("changes").forEach(x => { if (beforeStartMonth(x.effectiveMonth)) invalid.push(`Recurring change "${x.id}" is before project start`); });
+  arrays("fxRates").forEach(x => { if (beforeStartMonth(x.month)) invalid.push(`FX rate "${x.id}" is before project start`); });
+  arrays("budgets").forEach(x => { if (beforeStartMonth(x.startMonth)) invalid.push(`Monthly plan "${x.category||x.id}" starts before project start`); });
+  arrays("events").forEach(x => { if (beforeStartDate(x.date)) invalid.push(`Forecast event "${x.name||x.id}" is before project start`); });
+  if (invalid.length) throw new Error(`Project starts on ${projectStartDate}. ${invalid.slice(0,5).join("; ")}`);
 
   const appConfig = [
     ["schema_version","1.1","FinanceControl Google Sheets database schema",ts],
@@ -111,7 +124,8 @@ async function writeState(state) {
     ["owner_email","ziadrehiem@gmail.com","Database owner",ts],
     ["database_type","GOOGLE_SHEETS","Backend storage type",ts],
     ["api_version","v1","Expected Vercel API contract version",ts],
-    ["default_fx_egp_per_sar",num(settings.defaultFx)||13,"Fallback EGP per 1 SAR",ts]
+    ["default_fx_egp_per_sar",num(settings.defaultFx)||13,"Fallback EGP per 1 SAR",ts],
+    ["project_start_date",projectStartDate,"FinanceControl project start date; operational entries before this date are not allowed",ts]
   ];
 
   const data = {
