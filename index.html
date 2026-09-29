@@ -66,6 +66,15 @@ body.focus-mode #quickEntryCard{display:none}
 .whatif-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.whatif-impact{font-size:10px;margin-top:4px;color:var(--muted)}.scenario-actions{display:flex;gap:8px;flex-wrap:wrap}.approval-box{border:1px solid #cfe8dd;background:#f4fbf8;border-radius:13px;padding:12px;font-size:11px;color:#386e5b;line-height:1.45}.draft-box{border:1px solid #e3dcbd;background:#fffaf0;border-radius:13px;padding:12px;font-size:11px;color:#766124;line-height:1.45}
 .whatif-table th,.whatif-table td{font-size:10px}.item-row{display:grid;grid-template-columns:1.4fr .8fr .7fr .8fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #eef1f5}.item-row:last-child{border-bottom:0}.item-row .name{font-size:11px;font-weight:800}.item-row .sub{font-size:9px;color:var(--muted);margin-top:2px}.impact-positive{color:var(--good)}.impact-negative{color:var(--bad)}
 @media(max-width:1050px){.whatif-shell{grid-template-columns:1fr}.whatif-metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.whatif-metrics{grid-template-columns:1fr}.item-row{grid-template-columns:1fr auto}.item-row .hide-small{display:none}}
+/* v7 workflow-first experience */
+.nav-primary{display:grid;gap:3px}.nav-more{margin-top:14px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}.nav-more summary{list-style:none;cursor:pointer;color:#8190aa;font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;padding:8px 12px}.nav-more summary::-webkit-details-marker{display:none}.nav-more summary:after{content:"+";float:right}.nav-more[open] summary:after{content:"−"}
+.utility-menu{position:relative}.utility-menu summary{list-style:none;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700}.utility-menu summary::-webkit-details-marker{display:none}.utility-pop{position:absolute;right:0;top:44px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:8px;min-width:170px;display:grid;gap:5px}.utility-pop .btn{text-align:left}
+.home-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:14px;margin-bottom:14px}.position-card{padding:22px;background:linear-gradient(135deg,#17243c,#263a61);border-radius:20px;color:#fff;min-height:210px;display:flex;flex-direction:column;justify-content:space-between}.position-card .eyebrow{color:#aebcff}.position-card .hero-value{font-size:42px;font-weight:900;letter-spacing:-1.3px;margin-top:8px}.position-card .hero-copy{font-size:12px;color:#b8c5db;margin-top:5px}.position-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}.position-mini{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px}.position-mini span{display:block;font-size:9px;color:#aebbd0;text-transform:uppercase;letter-spacing:.06em}.position-mini b{display:block;font-size:15px;margin-top:5px}.home-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.btn.hero-primary{background:#fff;color:#17243c}.btn.hero-secondary{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#fff}
+.month-pulse{display:grid;gap:10px}.pulse-row{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff}.pulse-row .top{display:flex;justify-content:space-between;gap:10px;font-size:11px}.pulse-row .top b{font-size:13px}.pulse-track{height:9px;background:#edf0f6;border-radius:999px;overflow:hidden;margin-top:9px}.pulse-track i{display:block;height:100%;border-radius:999px;background:var(--accent)}.pulse-row .sub{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.35}
+.home-section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:22px 0 10px}.home-section-head h2{font-size:18px;margin:0}.home-section-head p{font-size:11px;color:var(--muted);margin:3px 0 0}.home-secondary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.home-secondary .metric{min-height:94px}.home-secondary .metric .value{font-size:19px}
+.entry-drawer-shell{position:fixed;inset:0;z-index:100;display:none}.entry-drawer-shell.open{display:block}.entry-backdrop{position:absolute;inset:0;background:rgba(11,18,32,.38);backdrop-filter:blur(2px)}.entry-drawer{position:absolute;right:0;top:0;bottom:0;width:min(920px,94vw);background:#f7f9fc;box-shadow:-24px 0 60px rgba(17,27,49,.2);overflow:auto;padding:22px}.entry-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.entry-head h2{margin:0;font-size:23px}.entry-head p{margin:5px 0 0;color:var(--muted);font-size:12px}.entry-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(310px,.95fr);gap:14px;align-items:start}.entry-form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px}.entry-impact{position:sticky;top:0;display:grid;gap:12px}.impact-main{background:#17243c;color:#fff;border-radius:18px;padding:18px}.impact-main .k{font-size:10px;color:#aebbd0;text-transform:uppercase;letter-spacing:.08em}.impact-main .v{font-size:30px;font-weight:900;margin-top:5px}.impact-main .s{font-size:11px;color:#b7c4da;margin-top:5px;line-height:1.4}.impact-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px}.impact-box{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px}.impact-box .k{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:800}.impact-box .before{font-size:11px;color:var(--muted);margin-top:5px}.impact-box .after{font-size:16px;font-weight:850;margin-top:3px}.impact-explain{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:11px;line-height:1.5;color:#566077}.impact-category{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}.impact-category .bar{height:8px;background:#edf0f6;border-radius:99px;overflow:hidden;margin:8px 0}.impact-category .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}.impact-category .row{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted)}
+.activity-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.activity-head h2{margin:0;font-size:20px}.activity-head p{margin:4px 0 0;font-size:11px;color:var(--muted)}.legacy-hidden{display:none!important}
+@media(max-width:1100px){.home-hero,.entry-layout{grid-template-columns:1fr}.entry-impact{position:static}.home-secondary{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.position-grid,.home-secondary,.impact-compare{grid-template-columns:1fr}.entry-drawer{width:100%;padding:14px}.topbar{align-items:flex-start}.toolbar{width:100%}}
 </style>
 </head>
 <body>
@@ -73,22 +82,25 @@ body.focus-mode #quickEntryCard{display:none}
 <aside>
   <div class="brand">Finance<b>Control</b></div><button id="navCollapseBtn" class="side-toggle" title="Collapse / expand navigation">☰</button>
   <div class="nav">
-    <div class="nav-label">Control center</div>
-    <button class="active" data-panel="dashboard"><span class="ico">◫</span>Overview</button>
-    <button data-panel="monthly"><span class="ico">▤</span>Monthly Review</button>
-    <button data-panel="plan"><span class="ico">◎</span>Monthly Plan</button>
-    <button data-panel="transactions"><span class="ico">↕</span>Transactions</button>
-    <button data-panel="recurring"><span class="ico">↻</span>Recurring</button>
-    <div class="nav-label">Planning</div>
-    <button data-panel="whatif"><span class="ico">?</span>What-If Lab</button>
-    <button data-panel="forecast"><span class="ico">⌁</span>Forecast & Stress Tests</button>
-    <button data-panel="goals"><span class="ico">◇</span>Goals</button>
-    <button data-panel="accounts"><span class="ico">▣</span>Accounts & Net Worth</button>
-    <div class="nav-label">Data</div>
-    <button data-panel="fx"><span class="ico">⇄</span>FX Rates</button>
-    <button data-panel="settings"><span class="ico">⚙</span>Settings & Backup</button>
+    <div class="nav-label">Money workflow</div>
+    <div class="nav-primary">
+      <button class="active" data-panel="dashboard"><span class="ico">◫</span>Home</button>
+      <button data-panel="transactions"><span class="ico">↕</span>Activity</button>
+      <button data-panel="plan"><span class="ico">◎</span>Plan</button>
+      <button data-panel="whatif"><span class="ico">?</span>Decisions</button>
+      <button data-panel="forecast"><span class="ico">⌁</span>Future</button>
+      <button data-panel="accounts"><span class="ico">▣</span>Accounts</button>
+    </div>
+    <details class="nav-more">
+      <summary>More tools</summary>
+      <button data-panel="monthly"><span class="ico">▤</span>Detailed month review</button>
+      <button data-panel="recurring"><span class="ico">↻</span>Recurring commitments</button>
+      <button data-panel="goals"><span class="ico">◇</span>Goals</button>
+      <button data-panel="fx"><span class="ico">⇄</span>FX rates</button>
+      <button data-panel="settings"><span class="ico">⚙</span>Settings & backup</button>
+    </details>
   </div>
-  <div class="side-note">FinanceControl <b>v6</b> · Google Sheets backed · flexible monthly planning and analysis.</div>
+  <div class="side-note">FinanceControl <b>v7</b> · Built around monthly decisions, not database screens.</div>
 </aside>
 <main>
   <div class="topbar">
@@ -96,71 +108,33 @@ body.focus-mode #quickEntryCard{display:none}
     <div class="toolbar">
       <div class="month-stepper">
         <button class="btn secondary" id="prevMonthBtn" title="Previous month">‹</button>
-        <div class="field inline"><label>Analysis month</label><input type="month" id="monthPicker"></div>
+        <div class="field inline"><label>Month</label><input type="month" id="monthPicker"></div>
         <button class="btn secondary" id="nextMonthBtn" title="Next month">›</button>
         <button class="btn soft" id="currentMonthBtn">Today</button>
       </div>
-      <div class="field inline"><label>Reporting currency</label><select id="reportCurrency"><option>SAR</option><option>EGP</option></select></div>
-      <button class="btn secondary" id="focusBtn">Focus mode</button>
-      <button class="btn secondary" id="densityBtn">Compact</button>
-      <button class="btn secondary" id="demoBtn">Load demo</button>
-      <span class="pill" style="align-self:end;margin-bottom:1px">BUILD v6.1 · WHAT-IF PLANNING</span>
+      <div class="field inline"><label>Currency</label><select id="reportCurrency"><option>SAR</option><option>EGP</option></select></div>
+      <button class="btn primary" id="openEntryBtn">+ Add transaction</button>
+      <button class="btn soft" id="openWhatIfBtn">What if?</button>
+      <details class="utility-menu"><summary>•••</summary><div class="utility-pop"><button class="btn secondary" id="focusBtn">Focus mode</button><button class="btn secondary" id="densityBtn">Compact</button><button class="btn secondary" id="demoBtn">Load demo</button></div></details>
     </div>
   </div>
   <div id="dataStatus" class="notice good" style="margin-bottom:14px;padding:9px 12px">v5.0 · Connecting to Google Sheets…</div>
 
   <section class="panel active" id="dashboard">
-    <div class="decision-grid">
-      <div class="decision-card"><div class="k">Safe to spend</div><div class="v" id="dSafeSpend">—</div><div class="s" id="dSafeSpendSub">After recorded spending and remaining commitments</div></div>
-      <div class="decision-card"><div class="k">Still committed</div><div class="v" id="dStillCommitted">—</div><div class="s">Unpaid recurring + reserves + planned one-offs</div></div>
-      <div class="decision-card"><div class="k">Liquid cash</div><div class="v" id="dLiquidCash">—</div><div class="s">Checking, savings and cash accounts</div></div>
-      <div class="decision-card"><div class="k">Cash runway</div><div class="v" id="dRunway">—</div><div class="s" id="dRunwaySub">Based on recent actual spending</div></div>
+    <div class="home-hero">
+      <div class="position-card"><div><div class="eyebrow">Your position this month</div><div class="hero-value" id="dSafeSpend">—</div><div class="hero-copy" id="dSafeSpendSub">Available after recorded spending and remaining commitments</div></div><div><div class="position-grid"><div class="position-mini"><span>Spent</span><b id="dActualExpense">—</b></div><div class="position-mini"><span>Still committed</span><b id="dStillCommitted">—</b></div><div class="position-mini"><span>Month cash flow</span><b id="dActualNet">—</b></div></div><div class="home-actions"><button class="btn hero-primary" id="homeAddBtn">+ Record transaction</button><button class="btn hero-secondary" id="homeWhatIfBtn">Test a purchase</button><button class="btn hero-secondary" id="homeMonthDetailBtn">Detailed month review</button></div></div></div>
+      <div class="month-pulse"><div class="pulse-row"><div class="top"><span>Spending vs monthly plan</span><b id="homePlanUse">—</b></div><div class="pulse-track"><i id="homePlanUseBar" style="width:0%"></i></div><div class="sub" id="homePlanUseSub">—</div></div><div class="pulse-row"><div class="top"><span>Income recorded</span><b id="dActualIncome">—</b></div><div class="sub" id="dActualIncomeSub">—</div></div><div class="pulse-row"><div class="top"><span>Liquid cash</span><b id="dLiquidCash">—</b></div><div class="sub" id="dRunwaySub">—</div></div><div class="pulse-row"><div class="top"><span>Cash runway</span><b id="dRunway">—</b></div><div class="sub">Liquid cash compared with recent average spending.</div></div></div>
     </div>
-    <div class="card" id="quickEntryCard" style="margin-bottom:14px;border:2px solid #cfd7ff;background:linear-gradient(135deg,#ffffff 0%,#f6f8ff 100%)">
-      <div class="section-title"><div><h3 style="font-size:17px">Quick add actual money movement</h3><span>Add income or expenditure here and watch the dashboard update immediately</span></div><span class="pill">NEW IN v4</span></div>
-      <div class="grid form-grid">
-        <div class="field"><label>Type</label><select id="qType"><option value="income">Income</option><option value="expense">Expense</option></select></div>
-        <div class="field span2"><label>Name</label><input id="qName" placeholder="Salary, rent, groceries..."></div>
-        <div class="field"><label>Category</label><input id="qCategory" list="categoryList" placeholder="Salary"></div>
-        <div class="field"><label>Date</label><input id="qDate" type="date"></div>
-        <div class="field"><label>Amount</label><input id="qAmount" type="number" min="0" step="0.01" placeholder="0.00"></div>
-        <div class="field"><label>Currency</label><select id="qCurrency"><option>SAR</option><option>EGP</option></select></div>
-        <div class="field"><label>Account</label><select id="qAccount"></select></div>
-        <div class="field"><label>FX override (EGP/SAR)</label><input id="qFx" type="number" min="0" step="0.0001" placeholder="Monthly rate"></div>
-        <div class="field"><label>Future recurrence</label><select id="qRecurring"><option value="no">Actual only</option><option value="monthly">Also make recurring monthly</option></select></div>
-        <div class="field"><label>Fixed?</label><select id="qFixed"><option value="yes">Fixed</option><option value="no">Variable</option></select></div>
-      </div>
-      <div class="form-actions" style="display:flex;gap:10px;align-items:center"><button class="btn primary" id="quickAddBtn" style="min-width:180px">Record entry</button><span id="quickResult" class="muted">Nothing recorded yet in this session.</span></div>
-    </div>
-    <div class="grid metrics">
-      <div class="card metric"><div class="label">Planned income</div><div class="value" id="dPlanIncome">—</div><div class="sub" id="dPlanIncomeSub">Recurring + future planned income</div></div>
-      <div class="card metric"><div class="label">Planned outflow</div><div class="value" id="dPlanOut">—</div><div class="sub">Fixed + flexible + non-monthly + goals</div></div>
-      <div class="card metric" id="dAvailableCard"><div class="label">Available after plan</div><div class="value" id="dAvailable">—</div><div class="sub">Planned income less the full monthly plan</div></div>
-      <div class="card metric" id="dProjectedCard"><div class="label">Projected month result</div><div class="value" id="dProjectedNet">—</div><div class="sub" id="dProjectedSub">Actual to date + remaining plan</div></div>
-      <div class="card metric good"><div class="label">Actual income</div><div class="value" id="dActualIncome">—</div><div class="sub" id="dActualIncomeSub">Income transactions recorded this month</div></div>
-      <div class="card metric"><div class="label">Actual spending</div><div class="value negative" id="dActualExpense">—</div><div class="sub" id="dActualExpenseSub">Expense transactions recorded this month</div></div>
-      <div class="card metric"><div class="label">Actual cash flow</div><div class="value" id="dActualNet">—</div><div class="sub" id="dActualSub">Income minus expenses recorded</div></div>
-      <div class="card metric"><div class="label">Net worth</div><div class="value" id="dNetWorth">—</div><div class="sub">Assets and accounts less liabilities</div></div>
-    </div>
-
-    <div class="grid two">
-      <div class="card chart"><div class="section-title"><h3>12-month cash forecast</h3><span id="forecastHeadline">Base plan</span></div><div id="dashboardForecastChart"></div><div class="legend"><span><i class="l1"></i>Projected liquid balance</span><span><i class="l3"></i>Positive month</span><span><i class="l2"></i>Negative month</span></div></div>
-      <div class="card"><div class="section-title"><h3>Monthly spending plan</h3><span id="planHealthLabel">—</span></div><div id="dashboardPlanBuckets"></div><hr class="sep"><div class="kpi-strip"><div class="mini"><div class="k">Fixed ratio</div><div class="v" id="fixedRatio">—</div><div class="s">of planned income</div></div><div class="mini"><div class="k">Budget left</div><div class="v" id="budgetRemaining">—</div><div class="s">flex + non-monthly</div></div><div class="mini"><div class="k">Goals</div><div class="v" id="goalFunding">—</div><div class="s">planned this month</div></div><div class="mini"><div class="k">FX</div><div class="v" id="dashboardFx">—</div><div class="s">EGP per SAR</div></div></div></div>
-    </div>
-
-    <div class="grid half" style="margin-top:14px">
-      <div class="card chart"><div class="section-title"><h3>Actual income vs spending</h3><span>Last 6 months</span></div><div id="trendChart"></div></div>
-      <div class="card"><div class="section-title"><h3>Spending composition</h3><span id="spendCompositionLabel">Selected month</span></div><div id="spendComposition"></div></div>
-    </div>
-
-    <div class="grid half" style="margin-top:14px">
-      <div class="card"><div class="section-title"><h3>Upcoming commitments</h3><span>Next 30 days</span></div><div class="upcoming" id="upcomingList"></div></div>
-      <div class="card"><div class="section-title"><h3>Attention needed</h3><span>Control checks</span></div><div class="alerts" id="dashboardAlerts"></div></div>
-    </div>
-
-    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Recent transactions</h3><span id="recentCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">Report value</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></div>
+    <div class="home-section-head"><div><h2>Month pulse</h2><p>Only the numbers that help you decide what to do next.</p></div><span id="planHealthLabel" class="pill">—</span></div>
+    <div class="home-secondary"><div class="card metric"><div class="label">Planned income</div><div class="value" id="dPlanIncome">—</div><div class="sub" id="dPlanIncomeSub">Recurring + planned income</div></div><div class="card metric"><div class="label">Full planned outflow</div><div class="value" id="dPlanOut">—</div><div class="sub">Commitments + flexible + goals</div></div><div class="card metric" id="dProjectedCard"><div class="label">Projected month result</div><div class="value" id="dProjectedNet">—</div><div class="sub" id="dProjectedSub">Actual + remaining plan</div></div><div class="card metric"><div class="label">Net worth</div><div class="value" id="dNetWorth">—</div><div class="sub">Assets less liabilities</div></div></div>
+    <div class="legacy-hidden"><div id="dAvailableCard"><span id="dAvailable"></span></div><span id="dActualExpenseSub"></span><span id="dActualSub"></span></div>
+    <div class="home-section-head"><div><h2>What changed?</h2><p>Spending trend and category mix for the selected month.</p></div></div>
+    <div class="grid two"><div class="card chart"><div class="section-title"><h3>Income vs spending</h3><span>Since project start</span></div><div id="trendChart"></div></div><div class="card"><div class="section-title"><h3>Where the money went</h3><span id="spendCompositionLabel">—</span></div><div id="spendComposition"></div></div></div>
+    <div class="home-section-head"><div><h2>What is coming?</h2><p>Known commitments, plan position, and control warnings.</p></div></div>
+    <div class="grid two"><div class="card"><div class="section-title"><h3>Upcoming 30 days</h3><span>Known commitments & events</span></div><div id="upcomingList"></div></div><div class="card"><div class="section-title"><h3>Plan composition</h3><span id="forecastHeadline">Current month</span></div><div class="kpi-strip"><div class="mini"><div class="k">Fixed / income</div><div class="v" id="fixedRatio">—</div></div><div class="mini"><div class="k">Budget remaining</div><div class="v" id="budgetRemaining">—</div></div><div class="mini"><div class="k">Goal funding</div><div class="v" id="goalFunding">—</div></div><div class="mini"><div class="k">EGP / SAR</div><div class="v" id="dashboardFx">—</div></div></div><div id="dashboardPlanBuckets" style="margin-top:12px"></div></div></div>
+    <div class="grid two" style="margin-top:14px"><div class="card chart"><div class="section-title"><h3>Looking ahead</h3><span>12-month projected liquid balance</span></div><div id="dashboardForecastChart"></div><div class="legend"><span><i class="l1"></i>Projected balance</span></div></div><div class="card"><div class="section-title"><h3>Needs attention</h3><span>Control checks</span></div><div class="alerts" id="dashboardAlerts"></div></div></div>
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Recent activity</h3><span id="recentCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">Report value</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></div>
   </section>
-
 
   <section class="panel" id="monthly">
     <div class="review-hero">
@@ -202,7 +176,8 @@ body.focus-mode #quickEntryCard{display:none}
   </section>
 
   <section class="panel" id="transactions">
-    <div class="card"><div class="section-title"><h3>Add actual transaction</h3><span>Money that actually moved</span></div><div class="grid form-grid"><div class="field"><label>Type</label><select id="tType"><option value="expense">Expense</option><option value="income">Income</option><option value="transfer">Transfer</option></select></div><div class="field span2"><label>Name / merchant</label><input id="tName" placeholder="Rent, salary, grocery store..."></div><div class="field"><label>Category</label><input id="tCategory" list="categoryList" placeholder="Housing"></div><div class="field"><label>Date</label><input id="tDate" type="date"></div><div class="field"><label>Amount</label><input id="tAmount" type="number" min="0" step="0.01"></div><div class="field"><label>Currency</label><select id="tCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Account</label><select id="tAccount"></select></div><div class="field"><label>FX override (EGP/SAR)</label><input id="tFx" type="number" min="0" step="0.0001" placeholder="Use monthly FX"></div><div class="field span2"><label>Notes</label><input id="tNotes" placeholder="Optional"></div></div><div class="form-actions"><button class="btn primary" id="addTransactionBtn">Add transaction</button></div></div>
+    <div class="card"><div class="activity-head"><div><h2>Activity</h2><p>Review, filter and correct the money movements already recorded.</p></div><button class="btn primary" id="activityAddBtn">+ Add transaction</button></div></div>
+    <div class="card legacy-hidden"><div class="section-title"><h3>Add actual transaction</h3><span>Money that actually moved</span></div><div class="grid form-grid"><div class="field"><label>Type</label><select id="tType"><option value="expense">Expense</option><option value="income">Income</option><option value="transfer">Transfer</option></select></div><div class="field span2"><label>Name / merchant</label><input id="tName" placeholder="Rent, salary, grocery store..."></div><div class="field"><label>Category</label><input id="tCategory" list="categoryList" placeholder="Housing"></div><div class="field"><label>Date</label><input id="tDate" type="date"></div><div class="field"><label>Amount</label><input id="tAmount" type="number" min="0" step="0.01"></div><div class="field"><label>Currency</label><select id="tCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Account</label><select id="tAccount"></select></div><div class="field"><label>FX override (EGP/SAR)</label><input id="tFx" type="number" min="0" step="0.0001" placeholder="Use monthly FX"></div><div class="field span2"><label>Notes</label><input id="tNotes" placeholder="Optional"></div></div><div class="form-actions"><button class="btn primary" id="addTransactionBtn">Add transaction</button></div></div>
     <div class="card" style="margin-top:14px"><div class="section-title"><h3>Transactions</h3><span id="transactionCount">—</span></div><div class="quick" style="margin-bottom:12px"><button id="showAllTx">All</button><button data-txfilter="expense">Expenses</button><button data-txfilter="income">Income</button><button id="exportCsvBtn">Export CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">FX</th><th class="num">Report value</th><th>Notes</th><th></th></tr></thead><tbody id="transactionTable"></tbody></table></div></div>
   </section>
 
@@ -298,11 +273,13 @@ body.focus-mode #quickEntryCard{display:none}
     <div class="grid half"><div class="card"><div class="section-title"><h3>Planning settings</h3><span>Defaults</span></div><div class="notice good" style="margin-bottom:12px"><b>Project start:</b> 1 October 2026. Operational history and month-by-month analysis begin here.</div><div class="grid form-grid"><div class="field"><label>Default EGP/SAR rate</label><input id="defaultFx" type="number" min="0" step="0.0001"></div><div class="field"><label>Default report currency</label><select id="defaultReport"><option>SAR</option><option>EGP</option></select></div></div><div class="form-actions"><button class="btn primary" id="saveSettingsBtn">Save settings</button></div></div><div class="card"><div class="section-title"><h3>Backup & portability</h3><span>Google Sheets database</span></div><div class="quick"><button id="exportBtn">Export full JSON backup</button><button id="importBtn">Import backup</button><button id="resetBtn">Reset all data</button></div><input type="file" id="importFile" accept="application/json" class="hidden"><div class="notice" style="margin-top:12px">Your financial records are stored in the private FinanceControl Google Sheet through Vercel server functions. Export remains useful as an independent portable backup.</div></div></div>
   </section>
 
+  <div class="entry-drawer-shell" id="entryDrawer" aria-hidden="true"><div class="entry-backdrop" id="entryBackdrop"></div><div class="entry-drawer" role="dialog" aria-modal="true" aria-labelledby="entryTitle"><div class="entry-head"><div><div class="eyebrow">Record money movement</div><h2 id="entryTitle">Add transaction</h2><p>See the effect on your month before you commit it.</p></div><button class="btn secondary" id="closeEntryBtn">Close</button></div><div class="entry-layout"><div class="entry-form"><div class="grid form-grid"><div class="field"><label>Type</label><select id="qType"><option value="expense">Expense</option><option value="income">Income</option></select></div><div class="field span2"><label>Name</label><input id="qName" placeholder="Rent, salary, groceries..."></div><div class="field"><label>Category</label><input id="qCategory" list="categoryList" placeholder="Housing"></div><div class="field"><label>Date</label><input id="qDate" type="date"></div><div class="field"><label>Amount</label><input id="qAmount" type="number" min="0" step="0.01" placeholder="0.00"></div><div class="field"><label>Currency</label><select id="qCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Account</label><select id="qAccount"></select></div><div class="field"><label>FX override (EGP/SAR)</label><input id="qFx" type="number" min="0" step="0.0001" placeholder="Monthly rate"></div><div class="field"><label>Future recurrence</label><select id="qRecurring"><option value="no">Actual only</option><option value="monthly">Also make recurring monthly</option></select></div><div class="field"><label>Fixed?</label><select id="qFixed"><option value="yes">Fixed</option><option value="no">Variable</option></select></div></div><div id="entryMatchHint" class="notice" style="margin-top:12px;display:none"></div><div class="form-actions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="quickAddBtn" style="min-width:180px">Record transaction</button><span id="quickResult" class="muted">Nothing recorded yet in this session.</span></div></div><div class="entry-impact"><div class="impact-main"><div class="k">Safe to spend after this</div><div class="v" id="entrySafeAfter">—</div><div class="s" id="entrySafeExplain">Enter an amount to preview the impact.</div></div><div class="impact-compare"><div class="impact-box"><div class="k">Monthly cash flow</div><div class="before" id="entryNetBefore">Before —</div><div class="after" id="entryNetAfter">After —</div></div><div class="impact-box"><div class="k">Still committed</div><div class="before" id="entryCommittedBefore">Before —</div><div class="after" id="entryCommittedAfter">After —</div></div><div class="impact-box"><div class="k">Actual spending</div><div class="before" id="entrySpendBefore">Before —</div><div class="after" id="entrySpendAfter">After —</div></div><div class="impact-box"><div class="k">Projected month result</div><div class="before" id="entryProjectedBefore">Before —</div><div class="after" id="entryProjectedAfter">After —</div></div></div><div class="impact-category"><div class="section-title" style="margin-bottom:4px"><h3>Category position</h3><span id="entryCategoryLabel">—</span></div><div class="bar"><i id="entryCategoryBar" style="width:0%"></i></div><div class="row"><span id="entryCategoryBefore">Before —</span><span id="entryCategoryAfter">After —</span></div></div><div class="impact-explain" id="entryImpactNote">The preview uses your current month plan, recurring commitments and recorded transactions. Nothing changes until you press Record transaction.</div></div></div></div></div>
+
   <datalist id="categoryList"><option>Salary</option><option>Bonus</option><option>Housing</option><option>Utilities</option><option>Groceries</option><option>Dining</option><option>Transport</option><option>Fuel</option><option>Family</option><option>Subscriptions</option><option>Health</option><option>Fitness</option><option>Shopping</option><option>Travel</option><option>Education</option><option>Insurance</option><option>Debt</option><option>Savings</option><option>Entertainment</option><option>Other</option></datalist>
 </main>
 </div>
 <script>
-const BUILD='v6.1.0 · Google Sheets';
+const BUILD='v7.0.0 · Google Sheets';
 const $=id=>document.getElementById(id); const n=v=>Number(v)||0; const id=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const today=new Date(); const currentMonth=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`; const isoToday=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 function blank(){return {version:2,settings:{defaultFx:13,reportCurrency:'SAR',projectStartDate:'2026-10-01'},accounts:[],transactions:[],recurring:[],changes:[],budgets:[],goals:[],events:[],fxRates:[],spendScenarios:[],scenarioItems:[]}}
