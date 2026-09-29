@@ -537,7 +537,7 @@ function duplicateRecurringGroups(){
 function renderDecisionStrip(){
   const m=$('monthPicker').value,c=monthControl(m),liquid=liquidBalanceSar(m),avg=recentAverageExpense(m,3),runway=avg?liquid/avg:0;
   $('dSafeSpend').textContent=moneySar(c.safe,m);
-  $('dSafeSpend').className='v '+(c.safe<0?'negative':'positive');
+  $('dSafeSpend').className='hero-value '+(c.safe<0?'negative':'positive');
   $('dSafeSpendSub').textContent=c.safe<0?'Commitments exceed expected available cash':'After actual spending and remaining known obligations';
   $('dStillCommitted').textContent=moneySar(c.committed,m);
   $('dLiquidCash').textContent=moneySar(liquid,m);
@@ -691,9 +691,12 @@ function recurringDraftMatch(){
   return state.recurring.find(r=>r.type===type&&recurringApplies(r,month)&&String(r.name||'').trim().toLowerCase()===name)||null
 }
 function renderEntryImpact(){
-  const date=$('qDate').value||projectDefaultDate(),month=monthOf(date),type=$('qType').value,amount=n($('qAmount').value),currency=$('qCurrency').value,category=$('qCategory').value.trim()||(type==='income'?'Income':'Other'),name=$('qName').value.trim()||'Draft transaction';
-  const before=monthControl(month),beforeProj=monthProjection(month),planMap=categoryPlanMap(month),beforeCat=categoryActualMap(month)[category]||0,match=recurringDraftMatch();
-  if(match&&(!$('qCategory').value.trim()||$('qCategory').value.trim()==='Other'))$('qCategory').value=match.category||'Other';
+  const date=$('qDate').value||projectDefaultDate(),month=monthOf(date),type=$('qType').value,amount=n($('qAmount').value),currency=$('qCurrency').value,name=$('qName').value.trim()||'Draft transaction';
+  let category=$('qCategory').value.trim()||(type==='income'?'Income':'Other');
+  const match=recurringDraftMatch();
+  if(match&&(!$('qCategory').value.trim()||$('qCategory').value.trim()==='Other')){category=match.category||'Other';$('qCategory').value=category}
+  if(match&&!$('qAccount').value&&match.accountId)$('qAccount').value=match.accountId;
+  const before=monthControl(month),beforeProj=monthProjection(month),planMap=categoryPlanMap(month),beforeCat=categoryActualMap(month)[category]||0;
   const hint=$('entryMatchHint');if(match){hint.style.display='block';hint.className='notice good';hint.innerHTML=`Recognized as <b>${esc(match.name)}</b>, an existing ${esc(match.frequency)} commitment. Recording it will reduce the remaining commitment as well as increase actual spending.`}else hint.style.display='none';
   if(amount<=0||!date||date<projectStartDate()){
     $('entrySafeAfter').textContent=moneySar(before.safe,month);$('entrySafeExplain').textContent='Enter an amount to preview the transaction.';
