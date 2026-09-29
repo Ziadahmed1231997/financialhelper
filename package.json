@@ -1,0 +1,9 @@
+{
+  "name": "financialhelper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "googleapis": "^182.0.0"
+  }
+}
