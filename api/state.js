@@ -5,8 +5,8 @@ const RANGE_SPECS = {
   AppConfig: "AppConfig!A2:D",
   Categories: "Categories!A2:J",
   Accounts: "Accounts!A2:L",
-  Transactions: "Transactions!A2:R",
-  Recurring: "Recurring!A2:S",
+  Transactions: "Transactions!A2:S",
+  Recurring: "Recurring!A2:T",
   RecurringChanges: "RecurringChanges!A2:J",
   FXRates: "FXRates!A2:J",
   MonthlyPlans: "MonthlyPlans!A2:N",
@@ -61,14 +61,14 @@ async function readState() {
       name: String(r[3]||""), category: categoryName(r[4], cats), accountId: String(r[5]||""),
       amount: num(r[6]), currency: String(r[7]||"SAR").toUpperCase(), fxRate: num(r[8]) || 1,
       sarAmount: num(r[9]), recurringId: String(r[10]||""), status: String(r[11]||"POSTED"),
-      notes: String(r[12]||""), source: String(r[13]||"WEB")
+      notes: String(r[12]||""), source: String(r[13]||"WEB"), transferToEgypt: bool(r[18])
     })),
     recurring: values.Recurring.filter(r => !r[17]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"expense").toLowerCase(),
       category: categoryName(r[3], cats), accountId: String(r[4]||""), amount: num(r[5]),
       currency: String(r[6]||"SAR").toUpperCase(), frequency: String(r[7]||"monthly").toLowerCase(),
       startMonth: month(r[8]), endMonth: month(r[9]), fixed: bool(r[10]), active: r[11] === "" || r[11] == null ? true : bool(r[11]),
-      day: num(r[13]) || 1, notes: String(r[14]||"")
+      day: num(r[13]) || 1, notes: String(r[14]||""), transferToEgypt: bool(r[19])
     })),
     changes: values.RecurringChanges.filter(r => !r[9]).map(r => ({
       id: String(r[0]||""), recurringId: String(r[1]||""), effectiveMonth: month(r[2]),
@@ -129,7 +129,7 @@ async function writeState(state) {
   if (invalid.length) throw new Error(`Project starts on ${projectStartDate}. ${invalid.slice(0,5).join("; ")}`);
 
   const appConfig = [
-    ["schema_version","1.2","FinanceControl Google Sheets database schema",ts],
+    ["schema_version","1.3","FinanceControl Google Sheets database schema",ts],
     ["app_name","FinanceControl","Application name",ts],
     ["reporting_currency",settings.reportCurrency || "SAR","Primary dashboard/reporting currency",ts],
     ["supported_currencies","SAR,EGP","Currencies accepted by the app",ts],
@@ -145,8 +145,8 @@ async function writeState(state) {
   const data = {
     AppConfig: appConfig,
     Accounts: arrays("accounts").map(a => [a.id,a.name,a.type,a.currency,num(a.balance),num(a.balance),a.includeNetWorth!==false,true,a.notes||"",ts,ts,""]),
-    Transactions: arrays("transactions").map(t => [t.id,t.date,t.type,t.name,categoryId(t.category,cats),t.accountId||"",num(t.amount),t.currency,num(t.fxRate)||1,num(t.sarAmount),t.recurringId||"",t.status||"POSTED",t.notes||"",t.source||"WEB",ts,ts,"",1]),
-    Recurring: arrays("recurring").map(r => [r.id,r.name,r.type,categoryId(r.category,cats),r.accountId||"",num(r.amount),r.currency,r.frequency||"monthly",dateFromMonth(r.startMonth),dateFromMonth(r.endMonth),r.fixed!==false,r.active!==false,"",num(r.day)||1,r.notes||"",ts,ts,"",1]),
+    Transactions: arrays("transactions").map(t => [t.id,t.date,t.type,t.name,categoryId(t.category,cats),t.accountId||"",num(t.amount),t.currency,num(t.fxRate)||1,num(t.sarAmount),t.recurringId||"",t.status||"POSTED",t.notes||"",t.source||"WEB",ts,ts,"",1,!!t.transferToEgypt]),
+    Recurring: arrays("recurring").map(r => [r.id,r.name,r.type,categoryId(r.category,cats),r.accountId||"",num(r.amount),r.currency,r.frequency||"monthly",dateFromMonth(r.startMonth),dateFromMonth(r.endMonth),r.fixed!==false,r.active!==false,"",num(r.day)||1,r.notes||"",ts,ts,"",1,!!r.transferToEgypt]),
     RecurringChanges: arrays("changes").map(c => [c.id,c.recurringId,dateFromMonth(c.effectiveMonth),num(c.oldAmount),num(c.newAmount),"",c.reason||"",ts,ts,""]),
     FXRates: arrays("fxRates").map(f => [f.id,dateFromMonth(f.month),"EGP","SAR",num(f.rate),f.note||"Manual","true",ts,ts,""]),
     MonthlyPlans: arrays("budgets").map(b => [b.id,b.startMonth,categoryId(b.category,cats),num(b.amount),b.currency,b.bucket||"flex",!!b.rollover,b.notes||"",ts,ts,"",1,b.endMonth||"",b.scheduleMode||"ongoing"]),
