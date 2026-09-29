@@ -48,7 +48,7 @@ async function readState() {
       defaultFx: num(config.default_fx_egp_per_sar) || 13,
       reportCurrency: config.reporting_currency || "SAR"
     },
-    accounts: values.Accounts.filter(r => !r[10]).map(r => ({
+    accounts: values.Accounts.filter(r => !r[11]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"checking").toLowerCase(),
       currency: String(r[3]||"SAR").toUpperCase(), balance: num(r[5] !== "" && r[5] != null ? r[5] : r[4]),
       includeNetWorth: r[6] === "" || r[6] == null ? true : bool(r[6]), notes: String(r[8]||"")
