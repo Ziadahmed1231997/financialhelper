@@ -9,7 +9,7 @@ const RANGE_SPECS = {
   Recurring: "Recurring!A2:S",
   RecurringChanges: "RecurringChanges!A2:J",
   FXRates: "FXRates!A2:J",
-  MonthlyPlans: "MonthlyPlans!A2:L",
+  MonthlyPlans: "MonthlyPlans!A2:N",
   Goals: "Goals!A2:O",
   ForecastEvents: "ForecastEvents!A2:O"
 };
@@ -76,7 +76,7 @@ async function readState() {
     })),
     budgets: values.MonthlyPlans.filter(r => !r[10]).map(r => ({
       id: String(r[0]||""), startMonth: month(r[1]), category: categoryName(r[2], cats), amount: num(r[3]),
-      currency: String(r[4]||"SAR").toUpperCase(), bucket: String(r[5]||"flex").toLowerCase(), rollover: bool(r[6]), notes: String(r[7]||"")
+      currency: String(r[4]||"SAR").toUpperCase(), bucket: String(r[5]||"flex").toLowerCase(), rollover: bool(r[6]), notes: String(r[7]||""), endMonth: month(r[12]), scheduleMode: String(r[13]||"ongoing").toLowerCase()
     })),
     goals: values.Goals.filter(r => !r[13]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), target: num(r[2]), currency: String(r[3]||"SAR").toUpperCase(),
@@ -121,7 +121,7 @@ async function writeState(state) {
     Recurring: arrays("recurring").map(r => [r.id,r.name,r.type,categoryId(r.category,cats),r.accountId||"",num(r.amount),r.currency,r.frequency||"monthly",dateFromMonth(r.startMonth),dateFromMonth(r.endMonth),r.fixed!==false,r.active!==false,"",num(r.day)||1,r.notes||"",ts,ts,"",1]),
     RecurringChanges: arrays("changes").map(c => [c.id,c.recurringId,dateFromMonth(c.effectiveMonth),num(c.oldAmount),num(c.newAmount),"",c.reason||"",ts,ts,""]),
     FXRates: arrays("fxRates").map(f => [f.id,dateFromMonth(f.month),"EGP","SAR",num(f.rate),f.note||"Manual","true",ts,ts,""]),
-    MonthlyPlans: arrays("budgets").map(b => [b.id,b.startMonth,categoryId(b.category,cats),num(b.amount),b.currency,b.bucket||"flex",!!b.rollover,b.notes||"",ts,ts,"",1]),
+    MonthlyPlans: arrays("budgets").map(b => [b.id,b.startMonth,categoryId(b.category,cats),num(b.amount),b.currency,b.bucket||"flex",!!b.rollover,b.notes||"",ts,ts,"",1,b.endMonth||"",b.scheduleMode||"ongoing"]),
     Goals: arrays("goals").map(g => [g.id,g.name,num(g.target),g.currency,dateFromMonth(g.dueMonth),num(g.current),num(g.monthlyContribution),g.priority||"",g.status||"ACTIVE",g.accountId||"",g.notes||"",ts,ts,"",1]),
     ForecastEvents: arrays("events").map(e => [e.id,e.name,e.date,e.type,categoryId(e.category,cats),num(e.amount),e.currency,num(e.probability)||100,e.scenarioId||"",e.status||"PLANNED",e.notes||"",ts,ts,"",1])
   };
