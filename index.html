@@ -198,7 +198,7 @@ function save(message='Saved'){
   renderAll();
   updateDataStatus('Saving to Google Sheets…','warn');
   const snapshot=JSON.parse(JSON.stringify(state));
-  saveChain=saveChain.then(async()=>{
+  saveChain=saveChain.catch(()=>{}).then(async()=>{
     const res=await fetch('/api/state',{
       method:'PUT',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -225,7 +225,16 @@ function monthDate(month,day=1){const [y,m]=month.split('-').map(Number);return 
 function addMonths(month,delta){const [y,m]=month.split('-').map(Number),d=new Date(y,m-1+delta,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function monthsBetween(a,b){const [ay,am]=a.split('-').map(Number),[by,bm]=b.split('-').map(Number);return (by-ay)*12+(bm-am)}
 function monthLabel(m){const d=monthDate(m);return d.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}
-function latestFx(month){const exact=state.fxRates.find(x=>x.month===month); if(exact)return n(exact.rate); const prior=state.fxRates.filter(x=>x.month<=month).sort((a,b)=>b.month.localeCompare(a.month))[0]; return prior?n(prior.rate):n(state.settings.defaultFx)||13}
+function latestFx(month){
+  const exact=state.fxRates.find(x=>x.month===month&&n(x.rate)>0);
+  if(exact)return n(exact.rate);
+  const prior=state.fxRates.filter(x=>x.month<=month&&n(x.rate)>0).sort((a,b)=>b.month.localeCompare(a.month))[0];
+  if(prior)return n(prior.rate);
+  const txExact=[...state.transactions].filter(t=>t.currency==='EGP'&&monthOf(t.date)===month&&n(t.fxRate)>0).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  if(txExact)return n(txExact.fxRate);
+  const txPrior=[...state.transactions].filter(t=>t.currency==='EGP'&&monthOf(t.date)<=month&&n(t.fxRate)>0).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  return txPrior?n(txPrior.fxRate):(n(state.settings.defaultFx)||13)
+}
 function toSAR(amount,currency,month,fxOverride){amount=n(amount); if(currency==='SAR')return amount; const rate=n(fxOverride)||latestFx(month); return rate?amount/rate:0}
 function fromSAR(amountSar,month,currency=state.settings.reportCurrency){return currency==='SAR'?n(amountSar):n(amountSar)*latestFx(month)}
 function moneySar(amountSar,month=$('monthPicker')?.value||currentMonth){const c=state.settings.reportCurrency||'SAR', val=fromSAR(amountSar,month,c); return `${c} ${val.toLocaleString(undefined,{maximumFractionDigits:0})}`}
@@ -244,7 +253,18 @@ function accountSar(a,month=$('monthPicker')?.value||currentMonth){return toSAR(
 function netWorthSar(month){return state.accounts.filter(a=>a.includeNetWorth!==false).reduce((s,a)=>s+(liabilityAccount(a)?-Math.abs(accountSar(a,month)):accountSar(a,month)),0)}
 function liquidBalanceSar(month){return state.accounts.filter(liquidAccount).reduce((s,a)=>s+accountSar(a,month),0)}
 function forecastOpeningBalanceSar(month){const liquid=state.accounts.filter(liquidAccount);if(liquid.length)return liquid.reduce((s,a)=>s+accountSar(a,month),0);const cutoff=month>currentMonth?currentMonth:month;return state.transactions.filter(t=>t.type!=='transfer'&&monthOf(t.date)<=cutoff).reduce((s,t)=>s+(t.type==='income'?n(t.sarAmount):-n(t.sarAmount)),0)}
-function monthlyActual(month){const rows=state.transactions.filter(t=>monthOf(t.date)===month&&t.type!=='transfer'); const income=rows.filter(t=>t.type==='income').reduce((s,t)=>s+n(t.sarAmount),0); const expense=rows.filter(t=>t.type==='expense').reduce((s,t)=>s+n(t.sarAmount),0); return {income,expense,net:income-expense,rows}}
+function transactionSar(t){
+  const stored=n(t.sarAmount);
+  if(t.currency==='SAR')return n(t.amount);
+  if(stored>0)return stored;
+  return toSAR(t.amount,t.currency,monthOf(t.date),t.fxRate)
+}
+function monthlyActual(month){
+  const rows=state.transactions.filter(t=>monthOf(t.date)===month&&t.type!=='transfer');
+  const income=rows.filter(t=>t.type==='income').reduce((s,t)=>s+transactionSar(t),0);
+  const expense=rows.filter(t=>t.type==='expense').reduce((s,t)=>s+transactionSar(t),0);
+  return {income,expense,net:income-expense,rows}
+}
 function monthProjection(month){const p=monthlyPlan(month,{income:1,fixed:1,flex:1}),a=monthlyActual(month);const remainingIncome=Math.max(0,p.income-a.income),remainingOut=Math.max(0,p.out-a.expense);return {plan:p,actual:a,remainingIncome,remainingOut,projectedIncome:a.income+remainingIncome,projectedOut:a.expense+remainingOut,projectedNet:a.net+remainingIncome-remainingOut}}
 function monthlyPlan(month,mods={income:1,fixed:1,flex:1}){const ri=state.recurring.filter(r=>r.type==='income').reduce((s,r)=>s+recurringMonthlySar(r,month),0)*mods.income; const re=state.recurring.filter(r=>r.type==='expense').reduce((s,r)=>s+recurringMonthlySar(r,month),0)*mods.fixed; const flex=state.budgets.filter(b=>b.bucket==='flex').reduce((s,b)=>s+budgetSar(b,month),0)*mods.flex; const nonmonthly=state.budgets.filter(b=>b.bucket==='nonmonthly').reduce((s,b)=>s+budgetSar(b,month),0)*mods.flex; const goals=state.goals.reduce((s,g)=>s+goalContributionSar(g,month),0); const events=state.events.filter(e=>monthOf(e.date)===month); const eventIncome=events.filter(e=>e.type==='income').reduce((s,e)=>s+eventSar(e),0)*mods.income; const eventExpense=events.filter(e=>e.type==='expense').reduce((s,e)=>s+eventSar(e),0)*mods.flex; const income=ri+eventIncome, out=re+flex+nonmonthly+goals+eventExpense; return {income,fixed:re,flex,nonmonthly,goals,eventIncome,eventExpense,out,net:income-out}}
 function budgetActual(category,month){return state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&t.category===category).reduce((s,t)=>s+n(t.sarAmount),0)}
@@ -310,7 +330,9 @@ $('quickAddBtn').onclick=()=>{
   const tx={id:id(),type,name,category,date,amount,currency,accountId:$('qAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:'Quick entry'};
   state.transactions.push(tx);
   if($('qRecurring').value==='monthly'){
-    state.recurring.push({id:id(),type,name,category,amount,currency,accountId:$('qAccount').value,frequency:'monthly',startMonth:monthOf(date),day:Math.min(28,Math.max(1,Number(date.slice(-2))||1)),fixed:$('qFixed').value==='yes',active:true});
+    const accountId=$('qAccount').value;
+    const duplicate=state.recurring.some(r=>r.active&&r.type===type&&String(r.name).trim().toLowerCase()===name.toLowerCase()&&r.currency===currency&&n(r.amount)===amount&&(r.accountId||'')===(accountId||'')&&r.startMonth===monthOf(date));
+    if(!duplicate)state.recurring.push({id:id(),type,name,category,amount,currency,accountId,frequency:'monthly',startMonth:monthOf(date),day:Math.min(28,Math.max(1,Number(date.slice(-2))||1)),fixed:$('qFixed').value==='yes',active:true});
   }
   $('monthPicker').value=monthOf(date);lastSavedText=`${type} · ${name} · ${moneyNative(amount,currency)}`;
   save(`${type==='income'?'Income':'Expense'} recorded`);
@@ -322,7 +344,7 @@ $('addTransactionBtn').onclick=async()=>{const amount=n($('tAmount').value),date
 $('addBudgetBtn').onclick=()=>{const amount=n($('bAmount').value),cat=$('bCategory').value.trim();if(!cat||!amount)return alert('Category and amount are required.');state.budgets.push({id:id(),category:cat,bucket:$('bBucket').value,amount,currency:$('bCurrency').value,startMonth:$('bStart').value||$('monthPicker').value,rollover:$('bRollover').value==='yes'});$('bCategory').value=$('bAmount').value='';save()};
 $('estimateBudgetsBtn').onclick=()=>{const m=$('monthPicker').value,months=Array.from({length:6},(_,i)=>addMonths(m,i-6)),cats={};state.transactions.filter(t=>t.type==='expense'&&months.includes(monthOf(t.date))).forEach(t=>(cats[t.category]??=[]).push(t));const existing=new Set(state.budgets.map(b=>b.category));let added=0;Object.entries(cats).forEach(([cat,rows])=>{if(existing.has(cat)||state.recurring.some(r=>r.type==='expense'&&r.category===cat))return;const total=rows.reduce((s,t)=>s+n(t.sarAmount),0),avg=total/6;if(avg>0){state.budgets.push({id:id(),category:cat,bucket:'flex',amount:Math.round(avg),currency:'SAR',startMonth:m,rollover:false});added++}});save();alert(added?`${added} suggested budgets added from the last 6 months. Review and adjust them.`:'No new budget suggestions were available from your history.')};
 $('useTransactionBtn').onclick=()=>{if(!$('rSourceTransaction').value)return alert('Select a transaction first.');promoteTransaction($('rSourceTransaction').value)};
-$('addRecurringBtn').onclick=()=>{const amount=n($('rAmount').value),name=$('rName').value.trim();if(!name||!amount)return alert('Name and amount are required.');state.recurring.push({id:id(),type:$('rType').value,name,category:$('rCategory').value.trim()||'Other',amount,currency:$('rCurrency').value,accountId:$('rAccount').value,frequency:$('rFrequency').value,startMonth:$('rStart').value||$('monthPicker').value,day:Math.min(28,Math.max(1,n($('rDay').value)||1)),fixed:$('rFixed').value==='yes',active:true});['rName','rCategory','rAmount'].forEach(x=>$(x).value='');save()};
+$('addRecurringBtn').onclick=()=>{const amount=n($('rAmount').value),name=$('rName').value.trim();if(!name||!amount)return alert('Name and amount are required.');const type=$('rType').value,currency=$('rCurrency').value,accountId=$('rAccount').value,startMonth=$('rStart').value||$('monthPicker').value;const duplicate=state.recurring.some(r=>r.active&&r.type===type&&String(r.name).trim().toLowerCase()===name.toLowerCase()&&r.currency===currency&&n(r.amount)===amount&&(r.accountId||'')===(accountId||'')&&r.startMonth===startMonth);if(duplicate)return alert('This recurring item already exists with the same type, name, amount, currency, account and start month.');state.recurring.push({id:id(),type,name,category:$('rCategory').value.trim()||'Other',amount,currency,accountId,frequency:$('rFrequency').value,startMonth,day:Math.min(28,Math.max(1,n($('rDay').value)||1)),fixed:$('rFixed').value==='yes',active:true});['rName','rCategory','rAmount'].forEach(x=>$(x).value='');save()};
 $('addEventBtn').onclick=()=>{const amount=n($('eAmount').value),date=$('eDate').value,name=$('eName').value.trim();if(!name||!amount||!date)return alert('Name, date and amount are required.');state.events.push({id:id(),type:$('eType').value,name,date,amount,currency:$('eCurrency').value,category:$('eCategory').value.trim()||'Other',accountId:$('eAccount').value});['eName','eAmount','eCategory'].forEach(x=>$(x).value='');save()};
 $('addGoalBtn').onclick=()=>{const name=$('gName').value.trim(),target=n($('gTarget').value);if(!name||!target)return alert('Goal name and target are required.');state.goals.push({id:id(),name,target,current:n($('gCurrent').value),currency:$('gCurrency').value,dueMonth:$('gDue').value,monthlyContribution:n($('gMonthly').value),accountId:$('gAccount').value});['gName','gTarget','gCurrent','gMonthly'].forEach(x=>$(x).value='');save()};
 $('addAccountBtn').onclick=()=>{const name=$('aName').value.trim();if(!name)return alert('Account name is required.');state.accounts.push({id:id(),name,type:$('aType').value,currency:$('aCurrency').value,balance:n($('aBalance').value),includeNetWorth:$('aNet').value==='yes'});$('aName').value=$('aBalance').value='';save()};
