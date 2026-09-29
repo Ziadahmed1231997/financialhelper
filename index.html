@@ -28,15 +28,47 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}.hidden{display:n
 @media(max-width:1000px){.app{grid-template-columns:1fr}aside{position:static;height:auto}.nav{display:flex;overflow:auto;gap:5px}.nav-label,.side-note{display:none}.nav button{width:auto;white-space:nowrap}.brand{margin-bottom:12px}.two,.half{grid-template-columns:1fr}.scenario-controls{grid-template-columns:repeat(2,1fr)}.month-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){main{padding:18px 14px 40px}.metrics{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr 1fr}.form-grid .span2{grid-column:span 2}.goal-grid,.account-grid{grid-template-columns:1fr}.kpi-strip{grid-template-columns:1fr 1fr}.plan-row{grid-template-columns:105px 1fr 70px}.plan-row .remaining{display:none}.donut-wrap{grid-template-columns:1fr}.scenario-controls{grid-template-columns:1fr 1fr}}
 @media(max-width:470px){.metrics,.form-grid,.kpi-strip,.month-grid,.scenario-controls{grid-template-columns:1fr}.form-grid .span2{grid-column:span 1}.topbar{align-items:flex-start}.toolbar{width:100%}.toolbar .field{flex:1}.toolbar input,.toolbar select{width:100%}}
+
+/* v6 flexible workspace */
+.side-toggle{position:absolute;right:12px;top:18px;border:1px solid rgba(255,255,255,.12);background:#172238;color:#c9d3e7;width:32px;height:32px;border-radius:9px}
+body.nav-collapsed .app{grid-template-columns:78px minmax(0,1fr)}
+body.nav-collapsed aside{padding-left:10px;padding-right:10px}
+body.nav-collapsed .brand{font-size:0;margin-left:7px}
+body.nav-collapsed .brand:after{content:"FC";font-size:18px;font-weight:900;color:#fff}
+body.nav-collapsed .nav-label,body.nav-collapsed .side-note{display:none}
+body.nav-collapsed .nav button{font-size:0;justify-content:center;padding:12px 8px}
+body.nav-collapsed .nav .ico{font-size:16px;width:auto}
+body.nav-collapsed .side-toggle{right:22px;top:56px}
+body.compact main{padding-top:16px}.compact .card{padding:12px}.compact .metrics{gap:9px}.compact .metric{min-height:96px}.compact th,.compact td{padding:7px 9px}
+body.focus-mode #quickEntryCard{display:none}
+.month-stepper{display:flex;align-items:flex-end;gap:5px}.month-stepper .btn{height:38px;padding:8px 10px}
+.decision-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.decision-card{background:linear-gradient(145deg,#fff,#fafbff);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:var(--shadow)}
+.decision-card .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.decision-card .v{font-size:21px;font-weight:900;margin-top:6px}.decision-card .s{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.35}
+.review-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;padding:18px;border-radius:18px;background:linear-gradient(135deg,#18243a,#26375a);color:#fff}
+.review-hero h2{margin:0;font-size:24px}.review-hero p{margin:6px 0 0;color:#b9c5db;font-size:12px}.review-hero .hero-number{text-align:right}.review-hero .hero-number b{display:block;font-size:26px}.review-hero .hero-number span{font-size:10px;color:#b9c5db}
+.review-metrics{grid-template-columns:repeat(6,minmax(0,1fr))}
+.review-metrics .metric{min-height:104px}.delta{font-size:10px;margin-top:5px}.delta.up{color:var(--good)}.delta.down{color:var(--bad)}.delta.flat{color:var(--muted)}
+.control-stack{display:grid;gap:12px}.control-line{display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:center}.control-line .label{font-size:11px;font-weight:750}.control-line .track{height:8px;background:#edf0f6;border-radius:99px;overflow:hidden}.control-line .track i{display:block;height:100%;background:var(--accent);border-radius:99px}.control-line .amount{font-size:11px;font-weight:750;white-space:nowrap}
+.analysis-table td strong{font-size:11px}.variance-good{color:var(--good);font-weight:800}.variance-bad{color:var(--bad);font-weight:800}.variance-neutral{color:var(--muted)}
+.status-chip{display:inline-flex;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:850}.status-paid{background:#eaf9f4;color:#087a55}.status-partial{background:#fff5e3;color:#a06b16}.status-due{background:#fff0f2;color:#c14556}
+.insight-list{display:grid;gap:8px}.insight-item{border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:11px;line-height:1.45;background:#fbfcff}.insight-item b{display:block;margin-bottom:2px}
+.month-history-table td,.month-history-table th{font-size:10px}
+.flex-callout{border:1px solid #d9defc;background:#f7f8ff;border-radius:14px;padding:12px 13px;font-size:11px;color:#59647b;line-height:1.5}
+@media(max-width:1300px){.review-metrics{grid-template-columns:repeat(3,1fr)}.decision-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.review-metrics,.decision-grid{grid-template-columns:1fr 1fr}.control-line{grid-template-columns:110px 1fr}.control-line .amount{grid-column:2;text-align:right}.month-stepper{width:100%}}
+@media(max-width:470px){.review-metrics,.decision-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
 <aside>
-  <div class="brand">Finance<b>Control</b></div>
+  <div class="brand">Finance<b>Control</b></div><button id="navCollapseBtn" class="side-toggle" title="Collapse / expand navigation">☰</button>
   <div class="nav">
     <div class="nav-label">Control center</div>
     <button class="active" data-panel="dashboard"><span class="ico">◫</span>Overview</button>
+    <button data-panel="monthly"><span class="ico">▤</span>Monthly Review</button>
     <button data-panel="plan"><span class="ico">◎</span>Monthly Plan</button>
     <button data-panel="transactions"><span class="ico">↕</span>Transactions</button>
     <button data-panel="recurring"><span class="ico">↻</span>Recurring</button>
@@ -48,21 +80,34 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}.hidden{display:n
     <button data-panel="fx"><span class="ico">⇄</span>FX Rates</button>
     <button data-panel="settings"><span class="ico">⚙</span>Settings & Backup</button>
   </div>
-  <div class="side-note">FinanceControl <b>v3.2</b> · Data stays in this browser unless you export a backup.</div>
+  <div class="side-note">FinanceControl <b>v6</b> · Google Sheets backed · flexible monthly planning and analysis.</div>
 </aside>
 <main>
   <div class="topbar">
     <div><div class="eyebrow">Personal finance command center</div><h1 id="pageTitle">Overview</h1><div class="subtitle" id="pageSubtitle">See what happened, what is planned, and what happens next.</div></div>
     <div class="toolbar">
-      <div class="field inline"><label>Planning month</label><input type="month" id="monthPicker"></div>
+      <div class="month-stepper">
+        <button class="btn secondary" id="prevMonthBtn" title="Previous month">‹</button>
+        <div class="field inline"><label>Analysis month</label><input type="month" id="monthPicker"></div>
+        <button class="btn secondary" id="nextMonthBtn" title="Next month">›</button>
+        <button class="btn soft" id="currentMonthBtn">Today</button>
+      </div>
       <div class="field inline"><label>Reporting currency</label><select id="reportCurrency"><option>SAR</option><option>EGP</option></select></div>
+      <button class="btn secondary" id="focusBtn">Focus mode</button>
+      <button class="btn secondary" id="densityBtn">Compact</button>
       <button class="btn secondary" id="demoBtn">Load demo</button>
-      <span class="pill" style="align-self:end;margin-bottom:1px">BUILD v4.0 — QUICK ENTRY + SAFE STORAGE</span>
+      <span class="pill" style="align-self:end;margin-bottom:1px">BUILD v6 · MONTHLY CONTROL</span>
     </div>
   </div>
   <div id="dataStatus" class="notice good" style="margin-bottom:14px;padding:9px 12px">v5.0 · Connecting to Google Sheets…</div>
 
   <section class="panel active" id="dashboard">
+    <div class="decision-grid">
+      <div class="decision-card"><div class="k">Safe to spend</div><div class="v" id="dSafeSpend">—</div><div class="s" id="dSafeSpendSub">After recorded spending and remaining commitments</div></div>
+      <div class="decision-card"><div class="k">Still committed</div><div class="v" id="dStillCommitted">—</div><div class="s">Unpaid recurring + reserves + planned one-offs</div></div>
+      <div class="decision-card"><div class="k">Liquid cash</div><div class="v" id="dLiquidCash">—</div><div class="s">Checking, savings and cash accounts</div></div>
+      <div class="decision-card"><div class="k">Cash runway</div><div class="v" id="dRunway">—</div><div class="s" id="dRunwaySub">Based on recent actual spending</div></div>
+    </div>
     <div class="card" id="quickEntryCard" style="margin-bottom:14px;border:2px solid #cfd7ff;background:linear-gradient(135deg,#ffffff 0%,#f6f8ff 100%)">
       <div class="section-title"><div><h3 style="font-size:17px">Quick add actual money movement</h3><span>Add income or expenditure here and watch the dashboard update immediately</span></div><span class="pill">NEW IN v4</span></div>
       <div class="grid form-grid">
@@ -108,13 +153,44 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}.hidden{display:n
     <div class="card" style="margin-top:14px"><div class="section-title"><h3>Recent transactions</h3><span id="recentCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">Report value</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></div>
   </section>
 
+
+  <section class="panel" id="monthly">
+    <div class="review-hero">
+      <div><div class="eyebrow" style="color:#aeb9ff">Monthly review</div><h2 id="mrMonthTitle">—</h2><p id="mrMonthSubtitle">Actuals, plan, commitments and comparison in one place.</p></div>
+      <div class="hero-number"><b id="mrHeroNet">—</b><span>net cash flow for selected month</span></div>
+    </div>
+
+    <div class="grid review-metrics" style="margin-bottom:14px">
+      <div class="card metric good"><div class="label">Actual income</div><div class="value" id="mrIncome">—</div><div class="delta" id="mrIncomeDelta">—</div></div>
+      <div class="card metric"><div class="label">Actual spending</div><div class="value" id="mrSpend">—</div><div class="delta" id="mrSpendDelta">—</div></div>
+      <div class="card metric"><div class="label">Net cash flow</div><div class="value" id="mrNet">—</div><div class="delta" id="mrNetDelta">—</div></div>
+      <div class="card metric"><div class="label">Savings rate</div><div class="value" id="mrSavings">—</div><div class="sub">Net cash flow ÷ income</div></div>
+      <div class="card metric"><div class="label">Safe to spend</div><div class="value" id="mrSafe">—</div><div class="sub">After unpaid commitments and reserves</div></div>
+      <div class="card metric"><div class="label">Still committed</div><div class="value" id="mrCommitted">—</div><div class="sub">Known obligations remaining this month</div></div>
+    </div>
+
+    <div class="grid two">
+      <div class="card chart"><div class="section-title"><h3>12-month income vs spending</h3><span>Selected month and prior 11 months</span></div><div id="mrTrendChart"></div></div>
+      <div class="card"><div class="section-title"><h3>Month control snapshot</h3><span id="mrPlanStatus">—</span></div><div class="control-stack" id="mrControlStack"></div><div class="flex-callout" style="margin-top:14px" id="mrControlNote">—</div></div>
+    </div>
+
+    <div class="grid half" style="margin-top:14px">
+      <div class="card"><div class="section-title"><h3>Category performance</h3><span>Plan vs actual vs prior month</span></div><div class="table-wrap"><table class="analysis-table"><thead><tr><th>Category</th><th class="num">Plan</th><th class="num">Actual</th><th class="num">Variance</th><th class="num">Prior</th><th>Trend</th></tr></thead><tbody id="mrCategoryTable"></tbody></table></div></div>
+      <div class="card"><div class="section-title"><h3>Recurring commitments</h3><span>Paid / partial / still due</span></div><div class="table-wrap"><table class="analysis-table"><thead><tr><th>Commitment</th><th>Due</th><th class="num">Plan</th><th class="num">Recorded</th><th class="num">Remaining</th><th>Status</th></tr></thead><tbody id="mrCommitmentsTable"></tbody></table></div></div>
+    </div>
+
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>12-month history</h3><span>One row per month for easy comparison</span></div><div class="table-wrap"><table class="month-history-table"><thead><tr><th>Month</th><th class="num">Income</th><th class="num">Spending</th><th class="num">Net</th><th class="num">Savings rate</th><th class="num">Planned outflow</th><th class="num">Variance</th><th class="num">FX EGP/SAR</th></tr></thead><tbody id="mrHistoryTable"></tbody></table></div></div>
+
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>What changed this month?</h3><span>Plain-language control observations</span></div><div class="insight-list" id="mrInsights"></div></div>
+  </section>
+
   <section class="panel" id="plan">
     <div class="grid two">
       <div class="card"><div class="section-title"><h3>Monthly plan</h3><span>Fixed + non-monthly + flexible + goals</span></div><div id="planSummary"></div></div>
       <div class="card"><div class="section-title"><h3>Plan controls</h3><span id="planMonthLabel">—</span></div><div class="notice">Fixed commitments come from your active recurring expenses. Use budgets below for <b>flexible</b> and <b>non-monthly</b> spending so the same expense is not counted twice.</div><div class="kpi-strip" style="margin-top:12px"><div class="mini"><div class="k">Income</div><div class="v" id="pIncome">—</div></div><div class="mini"><div class="k">Planned</div><div class="v" id="pOut">—</div></div><div class="mini"><div class="k">Actual spent</div><div class="v" id="pActual">—</div></div><div class="mini"><div class="k">Remaining</div><div class="v" id="pRemaining">—</div></div></div></div>
     </div>
-    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Add category budget</h3><span>For flexible or non-monthly spending</span></div><div class="grid form-grid"><div class="field"><label>Category</label><input id="bCategory" list="categoryList" placeholder="Groceries"></div><div class="field"><label>Bucket</label><select id="bBucket"><option value="flex">Flexible</option><option value="nonmonthly">Non-monthly</option></select></div><div class="field"><label>Monthly amount</label><input id="bAmount" type="number" min="0" step="0.01"></div><div class="field"><label>Currency</label><select id="bCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Start month</label><input id="bStart" type="month"></div><div class="field"><label>Rollover?</label><select id="bRollover"><option value="no">No</option><option value="yes">Yes</option></select></div></div><div class="form-actions"><button class="btn primary" id="addBudgetBtn">Add budget</button><button class="btn soft" id="estimateBudgetsBtn">Suggest from history</button></div></div>
-    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Category budgets</h3><span id="budgetCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Category</th><th>Bucket</th><th>Starts</th><th>Rollover</th><th class="num">Budget</th><th class="num">Actual</th><th class="num">Remaining</th><th></th></tr></thead><tbody id="budgetTable"></tbody></table></div></div>
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Add category budget</h3><span>For flexible or non-monthly spending</span></div><div class="grid form-grid"><div class="field"><label>Category</label><input id="bCategory" list="categoryList" placeholder="Groceries"></div><div class="field"><label>Bucket</label><select id="bBucket"><option value="flex">Flexible</option><option value="nonmonthly">Non-monthly</option></select></div><div class="field"><label>Monthly amount</label><input id="bAmount" type="number" min="0" step="0.01"></div><div class="field"><label>Currency</label><select id="bCurrency"><option>SAR</option><option>EGP</option></select></div><div class="field"><label>Start month</label><input id="bStart" type="month"></div><div class="field"><label>Schedule</label><select id="bMode"><option value="ongoing">Ongoing from start month</option><option value="month">This month only</option><option value="range">Custom month range</option></select></div><div class="field"><label>End month (range only)</label><input id="bEnd" type="month"></div><div class="field"><label>Rollover?</label><select id="bRollover"><option value="no">No</option><option value="yes">Yes</option></select></div></div><div class="form-actions"><button class="btn primary" id="addBudgetBtn">Add budget</button><button class="btn soft" id="estimateBudgetsBtn">Suggest from history</button></div></div>
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Category budgets</h3><span id="budgetCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Category</th><th>Bucket</th><th>Schedule</th><th>Starts</th><th>Ends</th><th>Rollover</th><th class="num">Budget</th><th class="num">Actual</th><th class="num">Remaining</th><th></th></tr></thead><tbody id="budgetTable"></tbody></table></div></div>
   </section>
 
   <section class="panel" id="transactions">
@@ -154,14 +230,14 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}.hidden{display:n
   </section>
 
   <section class="panel" id="settings">
-    <div class="grid half"><div class="card"><div class="section-title"><h3>Planning settings</h3><span>Defaults</span></div><div class="grid form-grid"><div class="field"><label>Default EGP/SAR rate</label><input id="defaultFx" type="number" min="0" step="0.0001"></div><div class="field"><label>Default report currency</label><select id="defaultReport"><option>SAR</option><option>EGP</option></select></div></div><div class="form-actions"><button class="btn primary" id="saveSettingsBtn">Save settings</button></div></div><div class="card"><div class="section-title"><h3>Backup & portability</h3><span>Local prototype</span></div><div class="quick"><button id="exportBtn">Export full JSON backup</button><button id="importBtn">Import backup</button><button id="resetBtn">Reset all data</button></div><input type="file" id="importFile" accept="application/json" class="hidden"><div class="notice" style="margin-top:12px">For a production version, this should move to authenticated storage (for example Supabase) with automatic backups. The prototype intentionally keeps everything local.</div></div></div>
+    <div class="grid half"><div class="card"><div class="section-title"><h3>Planning settings</h3><span>Defaults</span></div><div class="grid form-grid"><div class="field"><label>Default EGP/SAR rate</label><input id="defaultFx" type="number" min="0" step="0.0001"></div><div class="field"><label>Default report currency</label><select id="defaultReport"><option>SAR</option><option>EGP</option></select></div></div><div class="form-actions"><button class="btn primary" id="saveSettingsBtn">Save settings</button></div></div><div class="card"><div class="section-title"><h3>Backup & portability</h3><span>Google Sheets database</span></div><div class="quick"><button id="exportBtn">Export full JSON backup</button><button id="importBtn">Import backup</button><button id="resetBtn">Reset all data</button></div><input type="file" id="importFile" accept="application/json" class="hidden"><div class="notice" style="margin-top:12px">Your financial records are stored in the private FinanceControl Google Sheet through Vercel server functions. Export remains useful as an independent portable backup.</div></div></div>
   </section>
 
   <datalist id="categoryList"><option>Salary</option><option>Bonus</option><option>Housing</option><option>Utilities</option><option>Groceries</option><option>Dining</option><option>Transport</option><option>Fuel</option><option>Family</option><option>Subscriptions</option><option>Health</option><option>Fitness</option><option>Shopping</option><option>Travel</option><option>Education</option><option>Insurance</option><option>Debt</option><option>Savings</option><option>Entertainment</option><option>Other</option></datalist>
 </main>
 </div>
 <script>
-const BUILD='v5.0.0 · Google Sheets';
+const BUILD='v6.0.0 · Google Sheets';
 const $=id=>document.getElementById(id); const n=v=>Number(v)||0; const id=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const today=new Date(); const currentMonth=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`; const isoToday=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 function blank(){return {version:2,settings:{defaultFx:13,reportCurrency:'SAR'},accounts:[],transactions:[],recurring:[],changes:[],budgets:[],goals:[],events:[],fxRates:[]}}
@@ -243,9 +319,25 @@ function accountName(idv){return state.accounts.find(a=>a.id===idv)?.name||'Unas
 function recurringAmount(r,month){const changes=state.changes.filter(c=>c.recurringId===r.id&&c.effectiveMonth<=month).sort((a,b)=>b.effectiveMonth.localeCompare(a.effectiveMonth));return changes.length?n(changes[0].newAmount):n(r.amount)}
 function recurringApplies(r,month){if(!r.active||!r.startMonth||r.startMonth>month)return false; if(r.endMonth&&r.endMonth<month)return false; if(r.frequency==='monthly')return true; if(r.frequency==='yearly')return month.slice(5,7)===r.startMonth.slice(5,7); if(r.frequency==='weekly')return true; return true}
 function recurringMonthlySar(r,month){if(!recurringApplies(r,month))return 0; let amount=recurringAmount(r,month); if(r.frequency==='weekly')amount*=52/12; return toSAR(amount,r.currency,month)}
-function activeBudget(b,month){return !b.startMonth||b.startMonth<=month}
+function activeBudget(b,month){
+  const mode=b.scheduleMode||'ongoing';
+  if(!b.startMonth)return true;
+  if(mode==='month')return month===b.startMonth;
+  if(month<b.startMonth)return false;
+  if(b.endMonth&&month>b.endMonth)return false;
+  return true
+}
 function budgetSar(b,month){return activeBudget(b,month)?toSAR(b.amount,b.currency,month):0}
-function budgetAvailableSar(b,month){const base=budgetSar(b,month);if(!b.rollover||!activeBudget(b,month))return base;let carry=0,cur=b.startMonth||month,guard=0;while(cur<month&&guard<120){carry+=budgetSar(b,cur)-budgetActual(b.category,cur);cur=addMonths(cur,1);guard++;}return base+carry}
+function budgetAvailableSar(b,month){
+  const base=budgetSar(b,month),mode=b.scheduleMode||'ongoing';
+  if(mode==='month'||!b.rollover||!activeBudget(b,month))return base;
+  let carry=0,cur=b.startMonth||month,guard=0;
+  while(cur<month&&guard<120){
+    if(activeBudget(b,cur))carry+=budgetSar(b,cur)-budgetActual(b.category,cur);
+    cur=addMonths(cur,1);guard++;
+  }
+  return base+carry
+}
 function goalContributionSar(g,month){if(!g.dueMonth||month<=g.dueMonth)return toSAR(g.monthlyContribution,g.currency,month);return 0}
 function eventSar(e){return toSAR(e.amount,e.currency,monthOf(e.date))}
 function liquidAccount(a){return ['checking','savings','cash'].includes(a.type)} function liabilityAccount(a){return ['credit','loan'].includes(a.type)}
@@ -271,11 +363,11 @@ function budgetActual(category,month){return state.transactions.filter(t=>t.type
 function planBudgetRemaining(month){return state.budgets.reduce((s,b)=>s+(budgetSar(b,month)-budgetActual(b.category,month)),0)}
 function scenarioMods(){if(scenario==='conservative')return {income:.95,fixed:1,flex:1.1}; if(scenario==='lean')return {income:1,fixed:1,flex:.9}; return {income:n($('sIncome')?.value||100)/100,fixed:n($('sFixed')?.value||100)/100,flex:n($('sFlex')?.value||100)/100}}
 function forecastRows(startMonth,horizon,mods=scenarioMods()){const effectiveStart=startMonth<currentMonth?currentMonth:startMonth;let closing=forecastOpeningBalanceSar(effectiveStart);const rows=[];for(let i=0;i<horizon;i++){const m=addMonths(effectiveStart,i),p=monthlyPlan(m,mods);let effectiveNet=p.net,actualToDate=0,remainingIncome=p.income,remainingOut=p.out;if(m===currentMonth){const a=monthlyActual(m);actualToDate=a.net;remainingIncome=Math.max(0,p.income-a.income);remainingOut=Math.max(0,p.out-a.expense);effectiveNet=remainingIncome-remainingOut;}closing+=effectiveNet;rows.push({month:m,...p,net:effectiveNet,closing,actualToDate,remainingIncome,remainingOut});}return rows}
-function setDefaults(){if(!$('monthPicker').value)$('monthPicker').value=currentMonth; ['bStart','rStart','fxMonth'].forEach(x=>$(x).value=$(x).value||$('monthPicker').value); $('tDate').value=$('tDate').value||isoToday; $('qDate').value=$('qDate').value||isoToday; $('eDate').value=$('eDate').value||isoToday; $('gDue').value=$('gDue').value||addMonths(currentMonth,12); $('defaultFx').value=state.settings.defaultFx; $('defaultReport').value=state.settings.reportCurrency; $('reportCurrency').value=state.settings.reportCurrency}
+function setDefaults(){if(!$('monthPicker').value)$('monthPicker').value=currentMonth; ['bStart','rStart','fxMonth'].forEach(x=>$(x).value=$(x).value||$('monthPicker').value); if($('bMode')&&!$('bMode').value)$('bMode').value='ongoing'; $('tDate').value=$('tDate').value||isoToday; $('qDate').value=$('qDate').value||isoToday; $('eDate').value=$('eDate').value||isoToday; $('gDue').value=$('gDue').value||addMonths(currentMonth,12); $('defaultFx').value=state.settings.defaultFx; $('defaultReport').value=state.settings.reportCurrency; $('reportCurrency').value=state.settings.reportCurrency}
 function badge(type){const cls={income:'b-income',expense:'b-expense',transfer:'b-active',fixed:'b-fixed',flex:'b-flex',nonmonthly:'b-nonmonthly'}[type]||'b-active'; const label={nonmonthly:'Non-monthly'}[type]||type; return `<span class="badge ${cls}">${esc(label)}</span>`}
 function lineChart(el,rows){if(!rows.length){el.innerHTML='<div class="empty">Add account balances and planning data to build a forecast.</div>';return} const W=760,H=230,p={l:50,r:18,t:16,b:34}, vals=rows.map(r=>r.closing), min=Math.min(0,...vals),max=Math.max(1,...vals), range=max-min||1; const x=i=>p.l+i*(W-p.l-p.r)/Math.max(1,rows.length-1), y=v=>p.t+(max-v)*(H-p.t-p.b)/range; const points=rows.map((r,i)=>`${x(i)},${y(r.closing)}`).join(' '); const zero=y(0); const grids=[0,.25,.5,.75,1].map(q=>{const v=min+range*q, yy=y(v);return `<line x1="${p.l}" y1="${yy}" x2="${W-p.r}" y2="${yy}" stroke="#edf0f6"/><text x="${p.l-7}" y="${yy+3}" text-anchor="end" font-size="9" fill="#8a93a6">${Math.round(fromSAR(v,rows[0].month)/1000)}k</text>`}).join(''); const labels=rows.map((r,i)=>i%(rows.length>12?3:2)===0?`<text x="${x(i)}" y="${H-9}" text-anchor="middle" font-size="9" fill="#8a93a6">${monthLabel(r.month)}</text>`:'').join(''); const dots=rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.closing)}" r="3" fill="${r.net<0?'#dc5263':'#5568f0'}"><title>${monthLabel(r.month)}: ${moneySar(r.closing,r.month)}</title></circle>`).join(''); el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grids}<line x1="${p.l}" y1="${zero}" x2="${W-p.r}" y2="${zero}" stroke="#cdd3df" stroke-dasharray="4 4"/><polyline fill="none" stroke="#5568f0" stroke-width="3" points="${points}"/>${dots}${labels}</svg>`}
 function barTrend(el,months){const vals=months.map(m=>monthlyActual(m)),max=Math.max(1,...vals.flatMap(v=>[v.income,v.expense])); const W=760,H=230,p={l:40,r:15,t:15,b:32}, group=(W-p.l-p.r)/months.length; const bars=months.map((m,i)=>{const a=vals[i], bw=Math.max(8,group*.28), x0=p.l+i*group+group*.18, hi=(a.income/max)*(H-p.t-p.b), he=(a.expense/max)*(H-p.t-p.b);return `<rect x="${x0}" y="${H-p.b-hi}" width="${bw}" height="${hi}" rx="3" fill="#0f9f6e"><title>Income ${moneySar(a.income,m)}</title></rect><rect x="${x0+bw+4}" y="${H-p.b-he}" width="${bw}" height="${he}" rx="3" fill="#dc5263"><title>Spend ${moneySar(a.expense,m)}</title></rect><text x="${p.l+i*group+group/2}" y="${H-9}" text-anchor="middle" font-size="9" fill="#8a93a6">${monthLabel(m)}</text>`}).join(''); el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${p.l}" y1="${H-p.b}" x2="${W-p.r}" y2="${H-p.b}" stroke="#dfe4ed"/>${bars}</svg><div class="legend"><span><i class="l3"></i>Income</span><span><i class="l2"></i>Expenses</span></div>`}
-function renderNav(){document.querySelectorAll('.nav button[data-panel]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(b.dataset.panel).classList.add('active');$('pageTitle').textContent=b.textContent.trim(); const subs={dashboard:'See what happened, what is planned, and what happens next.',plan:'Build a monthly spending plan, not just a transaction log.',transactions:'Record actual income, spending and transfers.',recurring:'Turn repeated transactions into future commitments.',forecast:'Model the future and stress-test your plan.',goals:'Make savings obligations visible in the monthly plan.',accounts:'Track liquid cash, assets, liabilities and net worth.',fx:'Control the SAR/EGP assumptions used by history and forecasts.',settings:'Manage defaults and portable backups.'};$('pageSubtitle').textContent=subs[b.dataset.panel]||''; window.scrollTo({top:0,behavior:'smooth'})})}
+function renderNav(){document.querySelectorAll('.nav button[data-panel]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(b.dataset.panel).classList.add('active');$('pageTitle').textContent=b.textContent.trim(); const subs={dashboard:'See what happened, what is planned, and what happens next.',monthly:'Understand one month clearly, compare it with history, and see what is still committed.',plan:'Build a monthly spending plan, not just a transaction log.',transactions:'Record actual income, spending and transfers.',recurring:'Turn repeated transactions into future commitments.',forecast:'Model the future and stress-test your plan.',goals:'Make savings obligations visible in the monthly plan.',accounts:'Track liquid cash, assets, liabilities and net worth.',fx:'Control the SAR/EGP assumptions used by history and forecasts.',settings:'Manage defaults and portable backups.'};$('pageSubtitle').textContent=subs[b.dataset.panel]||''; window.scrollTo({top:0,behavior:'smooth'})})}
 function renderAccountOptions(){const opts='<option value="">Unassigned</option>'+state.accounts.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.currency}</option>`).join(''); ['qAccount','tAccount','rAccount','eAccount','gAccount'].forEach(idv=>{const el=$(idv),v=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===v))el.value=v})}
 function renderSpendComposition(month){
   const rows=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month);
@@ -306,8 +398,145 @@ function renderAlerts(month,forecast){
   if(!alerts.length)alerts.push({kind:'good',icon:'✓',title:'No control exceptions detected',text:'Current plan, actual activity, and forecast do not trigger a warning.'});
   $('dashboardAlerts').innerHTML=alerts.slice(0,6).map(x=>`<div class="alert ${x.kind}"><div class="icon">${x.icon}</div><div><strong>${esc(x.title)}</strong>${esc(x.text)}</div></div>`).join('');
 }
+
+function pctChange(cur,prev){if(!prev)return cur?null:0;return (cur-prev)/Math.abs(prev)*100}
+function deltaMarkup(cur,prev,{lowerIsBetter=false}={}){
+  const d=pctChange(cur,prev);
+  if(d===null)return '<span class="delta flat">No comparable prior value</span>';
+  const abs=Math.abs(d);
+  if(abs<.05)return '<span class="delta flat">No material change vs prior month</span>';
+  const up=d>0,good=lowerIsBetter?!up:up;
+  return `<span class="delta ${good?'up':'down'}">${up?'↑':'↓'} ${abs.toFixed(1)}% vs prior month</span>`
+}
+function recurringPaidSar(r,month){
+  const target=String(r.name||'').trim().toLowerCase();
+  return state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&String(t.name||'').trim().toLowerCase()===target).reduce((sum,t)=>sum+transactionSar(t),0)
+}
+function remainingRecurringSar(month){
+  return state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).reduce((sum,r)=>sum+Math.max(0,recurringMonthlySar(r,month)-recurringPaidSar(r,month)),0)
+}
+function actualFixedSpendSar(month){
+  const names=new Set(state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).map(r=>String(r.name||'').trim().toLowerCase()));
+  return state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&names.has(String(t.name||'').trim().toLowerCase())).reduce((sum,t)=>sum+transactionSar(t),0)
+}
+function actualBudgetBucketSar(month,bucket){
+  const cats=new Set(state.budgets.filter(b=>b.bucket===bucket&&activeBudget(b,month)).map(b=>b.category));
+  return state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&cats.has(t.category)).reduce((sum,t)=>sum+transactionSar(t),0)
+}
+function remainingNonmonthlySar(month){
+  const planned=state.budgets.filter(b=>b.bucket==='nonmonthly').reduce((sum,b)=>sum+budgetSar(b,month),0);
+  return Math.max(0,planned-actualBudgetBucketSar(month,'nonmonthly'))
+}
+function remainingEventExpenseSar(month){
+  return state.events.filter(e=>e.type==='expense'&&monthOf(e.date)===month).reduce((sum,e)=>{
+    const planned=eventSar(e),key=String(e.name||'').trim().toLowerCase();
+    const paid=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&String(t.name||'').trim().toLowerCase()===key).reduce((s,t)=>s+transactionSar(t),0);
+    return sum+Math.max(0,planned-paid)
+  },0)
+}
+function monthControl(month){
+  const p=monthlyPlan(month,{income:1,fixed:1,flex:1}),a=monthlyActual(month);
+  const remainingFixed=remainingRecurringSar(month);
+  const remainingNonmonthly=remainingNonmonthlySar(month);
+  const remainingEvents=remainingEventExpenseSar(month);
+  const goalReserve=p.goals;
+  const committed=remainingFixed+remainingNonmonthly+remainingEvents+goalReserve;
+  const expectedIncome=Math.max(p.income,a.income);
+  const safe=expectedIncome-a.expense-committed;
+  const savingsRate=a.income?a.net/a.income*100:0;
+  const planUtil=p.out?a.expense/p.out*100:0;
+  return {p,a,remainingFixed,remainingNonmonthly,remainingEvents,goalReserve,committed,expectedIncome,safe,savingsRate,planUtil}
+}
+function recentAverageExpense(month,count=3){
+  const vals=Array.from({length:count},(_,i)=>monthlyActual(addMonths(month,-i)).expense).filter(v=>v>0);
+  return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0
+}
+function categoryPlanMap(month){
+  const out={};
+  const add=(k,v)=>out[k]=(out[k]||0)+v;
+  state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).forEach(r=>add(r.category||'Other',recurringMonthlySar(r,month)));
+  state.budgets.filter(b=>activeBudget(b,month)).forEach(b=>add(b.category||'Other',budgetSar(b,month)));
+  state.events.filter(e=>e.type==='expense'&&monthOf(e.date)===month).forEach(e=>add(e.category||'Other',eventSar(e)));
+  if(monthlyPlan(month).goals>0)add('Savings / Goals',monthlyPlan(month).goals);
+  return out
+}
+function categoryActualMap(month){
+  const out={};state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month).forEach(t=>out[t.category||'Other']=(out[t.category||'Other']||0)+transactionSar(t));return out
+}
+function duplicateRecurringGroups(){
+  const map={};state.recurring.filter(r=>r.active).forEach(r=>{const k=[r.type,String(r.name||'').trim().toLowerCase(),n(r.amount),r.currency,r.startMonth||''].join('|');(map[k]??=[]).push(r)});
+  return Object.values(map).filter(x=>x.length>1)
+}
+function renderDecisionStrip(){
+  const m=$('monthPicker').value,c=monthControl(m),liquid=liquidBalanceSar(m),avg=recentAverageExpense(m,3),runway=avg?liquid/avg:0;
+  $('dSafeSpend').textContent=moneySar(c.safe,m);
+  $('dSafeSpend').className='v '+(c.safe<0?'negative':'positive');
+  $('dSafeSpendSub').textContent=c.safe<0?'Commitments exceed expected available cash':'After actual spending and remaining known obligations';
+  $('dStillCommitted').textContent=moneySar(c.committed,m);
+  $('dLiquidCash').textContent=moneySar(liquid,m);
+  $('dRunway').textContent=avg?`${runway.toFixed(1)} mo`:'—';
+  $('dRunwaySub').textContent=avg?'Current liquid cash ÷ recent average monthly spending':'Add account balances and spending history';
+}
+function renderMonthlyReview(){
+  const m=$('monthPicker').value,prev=addMonths(m,-1),c=monthControl(m),pc=monthControl(prev);
+  $('mrMonthTitle').textContent=monthDate(m).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  $('mrMonthSubtitle').textContent=`Compared with ${monthDate(prev).toLocaleDateString(undefined,{month:'long',year:'numeric'})} · reporting in ${state.settings.reportCurrency}`;
+  $('mrHeroNet').textContent=moneySar(c.a.net,m);
+  $('mrIncome').textContent=moneySar(c.a.income,m);$('mrIncomeDelta').innerHTML=deltaMarkup(c.a.income,pc.a.income);
+  $('mrSpend').textContent=moneySar(c.a.expense,m);$('mrSpendDelta').innerHTML=deltaMarkup(c.a.expense,pc.a.expense,{lowerIsBetter:true});
+  $('mrNet').textContent=moneySar(c.a.net,m);$('mrNet').className='value '+(c.a.net<0?'negative':'positive');$('mrNetDelta').innerHTML=deltaMarkup(c.a.net,pc.a.net);
+  $('mrSavings').textContent=c.a.income?`${c.savingsRate.toFixed(1)}%`:'—';
+  $('mrSafe').textContent=moneySar(c.safe,m);$('mrSafe').className='value '+(c.safe<0?'negative':'positive');
+  $('mrCommitted').textContent=moneySar(c.committed,m);
+
+  const months=Array.from({length:12},(_,i)=>addMonths(m,i-11));barTrend($('mrTrendChart'),months);
+  const controls=[
+    ['Actual spending',c.a.expense,Math.max(c.p.out,1)],
+    ['Fixed commitments',c.p.fixed,Math.max(c.p.income,1)],
+    ['Flexible budgets',c.p.flex,Math.max(c.p.income,1)],
+    ['Non-monthly reserves',c.p.nonmonthly+c.p.eventExpense,Math.max(c.p.income,1)],
+    ['Goal funding',c.p.goals,Math.max(c.p.income,1)]
+  ];
+  $('mrControlStack').innerHTML=controls.map(([label,val,max])=>`<div class="control-line"><div class="label">${label}</div><div class="track"><i style="width:${Math.min(100,val/max*100)}%"></i></div><div class="amount">${moneySar(val,m)}</div></div>`).join('');
+  const variance=c.a.expense-c.p.out;
+  $('mrPlanStatus').textContent=c.p.out?`${c.planUtil.toFixed(0)}% of planned outflow recorded`:'No monthly plan yet';
+  $('mrControlNote').innerHTML=c.p.out
+    ? `Actual spending is <b>${moneySar(Math.abs(variance),m)}</b> ${variance>0?'above':'below'} the full-month plan. Safe-to-spend is calculated after remaining known commitments, not simply plan minus actual.`
+    : 'Create recurring commitments and flexible/non-monthly budgets to turn the transaction history into a real monthly control plan.';
+
+  const planMap=categoryPlanMap(m),actualMap=categoryActualMap(m),priorMap=categoryActualMap(prev);
+  const cats=[...new Set([...Object.keys(planMap),...Object.keys(actualMap),...Object.keys(priorMap)])].sort((a,b)=>(actualMap[b]||planMap[b]||0)-(actualMap[a]||planMap[a]||0));
+  $('mrCategoryTable').innerHTML=cats.length?cats.map(cat=>{
+    const plan=planMap[cat]||0,actual=actualMap[cat]||0,prior=priorMap[cat]||0,v=actual-plan,trend=pctChange(actual,prior);
+    const trendTxt=trend===null?'New':Math.abs(trend)<.05?'Flat':`${trend>0?'↑':'↓'} ${Math.abs(trend).toFixed(0)}%`;
+    return `<tr><td><strong>${esc(cat)}</strong></td><td class="num">${moneySar(plan,m)}</td><td class="num">${moneySar(actual,m)}</td><td class="num ${v>0?'variance-bad':v<0?'variance-good':'variance-neutral'}">${v>0?'+':''}${moneySar(v,m)}</td><td class="num">${moneySar(prior,prev)}</td><td>${trendTxt}</td></tr>`
+  }).join(''):'<tr><td colspan="6" class="empty">No category activity or plan for this month.</td></tr>';
+
+  const recurringRows=state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,m)).sort((a,b)=>(a.day||1)-(b.day||1));
+  $('mrCommitmentsTable').innerHTML=recurringRows.length?recurringRows.map(r=>{
+    const plan=recurringMonthlySar(r,m),paid=recurringPaidSar(r,m),remaining=Math.max(0,plan-paid),status=remaining<=.01?'paid':paid>0?'partial':'due';
+    return `<tr><td><strong>${esc(r.name)}</strong><div class="muted">${esc(r.category||'Other')}</div></td><td>Day ${r.day||1}</td><td class="num">${moneySar(plan,m)}</td><td class="num">${moneySar(paid,m)}</td><td class="num">${moneySar(remaining,m)}</td><td><span class="status-chip status-${status}">${status==='paid'?'Paid':status==='partial'?'Partial':'Still due'}</span></td></tr>`
+  }).join(''):'<tr><td colspan="6" class="empty">No recurring expense commitments for this month.</td></tr>';
+
+  $('mrHistoryTable').innerHTML=months.slice().reverse().map(mm=>{
+    const x=monthControl(mm),rate=x.a.income?x.a.net/x.a.income*100:0,v=x.a.expense-x.p.out;
+    return `<tr><td><strong>${monthDate(mm).toLocaleDateString(undefined,{month:'short',year:'numeric'})}</strong></td><td class="num">${moneySar(x.a.income,mm)}</td><td class="num">${moneySar(x.a.expense,mm)}</td><td class="num ${x.a.net<0?'negative':'positive'}">${moneySar(x.a.net,mm)}</td><td class="num">${x.a.income?rate.toFixed(1)+'%':'—'}</td><td class="num">${moneySar(x.p.out,mm)}</td><td class="num ${v>0?'negative':v<0?'positive':''}">${v>0?'+':''}${moneySar(v,mm)}</td><td class="num">${latestFx(mm).toFixed(2)}</td></tr>`
+  }).join('');
+
+  const insights=[];
+  const spendDelta=pctChange(c.a.expense,pc.a.expense),incomeDelta=pctChange(c.a.income,pc.a.income);
+  if(incomeDelta!==null)insights.push(['Income movement',`Recorded income is ${Math.abs(incomeDelta).toFixed(1)}% ${incomeDelta>=0?'higher':'lower'} than the prior month.`]);
+  if(spendDelta!==null)insights.push(['Spending movement',`Recorded spending is ${Math.abs(spendDelta).toFixed(1)}% ${spendDelta>=0?'higher':'lower'} than the prior month.`]);
+  if(c.p.income>0)insights.push(['Committed share',`Known fixed commitments, reserves and goals represent ${((c.p.fixed+c.p.nonmonthly+c.p.eventExpense+c.p.goals)/c.p.income*100).toFixed(1)}% of planned income before flexible spending.`]);
+  insights.push(['Available flexibility',c.safe>=0?`After recorded spending and remaining known commitments, ${moneySar(c.safe,m)} remains uncommitted for this month.`:`Recorded spending plus remaining commitments exceed expected monthly income by ${moneySar(Math.abs(c.safe),m)}.`]);
+  const avg=recentAverageExpense(m,3),liquid=liquidBalanceSar(m);if(avg&&liquid)insights.push(['Liquidity runway',`Current liquid account balances equal about ${(liquid/avg).toFixed(1)} months of recent average spending.`]);
+  const dupes=duplicateRecurringGroups();if(dupes.length)insights.push(['Data quality',`${dupes.length} duplicated recurring commitment group${dupes.length===1?'':'s'} detected. Duplicates can overstate planned outflow.`]);
+  if(!state.accounts.length)insights.push(['Accounts missing','No account balances are recorded, so liquidity, runway and net-worth analysis remain incomplete.']);
+  $('mrInsights').innerHTML=insights.map(([title,text])=>`<div class="insight-item"><b>${esc(title)}</b>${esc(text)}</div>`).join('');
+}
+
 function renderDashboard(){const m=$('monthPicker').value,p=monthlyPlan(m,{income:1,fixed:1,flex:1}),a=monthlyActual(m),proj=monthProjection(m),avail=p.income-p.out,rate=a.income?Math.max(-999,(a.net/a.income)*100):0;$('dPlanIncome').textContent=moneySar(p.income,m);$('dPlanOut').textContent=moneySar(p.out,m);$('dAvailable').textContent=moneySar(avail,m);$('dActualIncome').textContent=moneySar(a.income,m);$('dActualExpense').textContent=moneySar(a.expense,m);$('dActualNet').textContent=moneySar(a.net,m);$('dProjectedNet').textContent=moneySar(proj.projectedNet,m);$('dNetWorth').textContent=moneySar(netWorthSar(m),m);$('dAvailableCard').className='card metric '+(avail<0?'bad':avail<p.income*.1?'warn':'good');$('dProjectedCard').className='card metric '+(proj.projectedNet<0?'bad':proj.projectedNet===0?'warn':'good');$('dActualNet').className=a.net<0?'value negative':'value positive';$('dActualIncomeSub').textContent=`${a.rows.filter(t=>t.type==='income').length} income transaction${a.rows.filter(t=>t.type==='income').length===1?'':'s'} recorded`;$('dActualExpenseSub').textContent=`${a.rows.filter(t=>t.type==='expense').length} expense transaction${a.rows.filter(t=>t.type==='expense').length===1?'':'s'} recorded`;$('dActualSub').textContent=`Net of ${moneySar(a.income,m)} income and ${moneySar(a.expense,m)} spending · savings rate ${a.income?rate.toFixed(1)+'%':'—'}`;$('dProjectedSub').textContent=`Actual ${moneySar(a.net,m)} + remaining plan ${moneySar(proj.remainingIncome-proj.remainingOut,m)}`;const horizon=12,rows=forecastRows(m,horizon,{income:1,fixed:1,flex:1});lineChart($('dashboardForecastChart'),rows);$('forecastHeadline').textContent=m===currentMonth?'Actual-to-date + remaining plan':'Base plan';const fixedRatio=p.income?p.fixed/p.income*100:0;$('fixedRatio').textContent=`${fixedRatio.toFixed(0)}%`;$('budgetRemaining').textContent=moneySar(planBudgetRemaining(m),m);$('goalFunding').textContent=moneySar(p.goals,m);$('dashboardFx').textContent=latestFx(m).toFixed(2);const buckets=[['Fixed',p.fixed,'#5568f0'],['Flexible',p.flex,'#8b5cf6'],['Non-monthly',p.nonmonthly+p.eventExpense,'#d28a17'],['Goals',p.goals,'#0f9f6e']];$('dashboardPlanBuckets').innerHTML=buckets.map(([name,val,color])=>`<div class="bucket"><div class="left"><span class="dot" style="background:${color}"></span><div><div class="name">${name}</div><div class="sub">${name==='Fixed'?'Recurring commitments':name==='Goals'?'Savings contributions':'Planned spending'}</div></div></div><div class="amt">${moneySar(val,m)}</div></div>`).join('');$('planHealthLabel').textContent=avail>=0?'Plan balances':'Plan exceeds income';const months=Array.from({length:6},(_,i)=>addMonths(m,i-5));barTrend($('trendChart'),months);renderSpendComposition(m);renderUpcoming();renderAlerts(m,rows);const recent=[...state.transactions].sort((x,y)=>y.date.localeCompare(x.date)).slice(0,8);$('recentCount').textContent=`${recent.length} shown`;$('recentTransactions').innerHTML=recent.length?recent.map(t=>`<tr><td>${t.date}</td><td>${esc(t.name)}</td><td>${badge(t.type)}</td><td>${esc(t.category)}</td><td>${esc(accountName(t.accountId))}</td><td class="num">${moneyNative(t.amount,t.currency)}</td><td class="num">${moneySar(t.sarAmount,monthOf(t.date))}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">No transactions yet.</td></tr>'}
-function renderPlan(){const m=$('monthPicker').value,p=monthlyPlan(m),a=monthlyActual(m);$('planMonthLabel').textContent=monthLabel(m);$('pIncome').textContent=moneySar(p.income,m);$('pOut').textContent=moneySar(p.out,m);$('pActual').textContent=moneySar(a.expense,m);$('pRemaining').textContent=moneySar(p.income-p.out,m); const sections=[{name:'Fixed commitments',planned:p.fixed,actual:state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,m)).reduce((s,r)=>s+budgetActual(r.category,m),0),desc:'Active recurring expenses'},{name:'Flexible spending',planned:p.flex,actual:state.budgets.filter(b=>b.bucket==='flex').reduce((s,b)=>s+budgetActual(b.category,m),0),desc:'Everyday variable categories'},{name:'Non-monthly',planned:p.nonmonthly+p.eventExpense,actual:state.budgets.filter(b=>b.bucket==='nonmonthly').reduce((s,b)=>s+budgetActual(b.category,m),0),desc:'Irregular / sinking-fund items'},{name:'Goals',planned:p.goals,actual:0,desc:'Reserved monthly contributions'}];$('planSummary').innerHTML=`<div class="plan-stack">${sections.map(x=>{const remaining=x.planned-x.actual,pct=x.planned?Math.min(140,x.actual/x.planned*100):0;return `<div class="plan-row"><div><div class="name">${x.name}</div><div class="muted" style="font-size:10px">${x.desc}</div></div><div class="bar ${pct>100?'bad':''}"><i style="width:${Math.min(100,pct)}%"></i></div><div class="amount">${moneySar(x.actual,m)} / ${moneySar(x.planned,m)}</div><div class="remaining ${remaining<0?'negative':'positive'}">${moneySar(remaining,m)}</div></div>`}).join('')}</div>`; $('budgetCount').textContent=`${state.budgets.length} budgets`; $('budgetTable').innerHTML=state.budgets.length?state.budgets.map(b=>{const plan=budgetAvailableSar(b,m),actual=budgetActual(b.category,m),rem=plan-actual;return `<tr><td>${esc(b.category)}</td><td>${badge(b.bucket)}</td><td>${b.startMonth||'—'}</td><td>${b.rollover?'Yes':'No'}</td><td class="num">${moneySar(plan,m)}</td><td class="num">${moneySar(actual,m)}</td><td class="num ${rem<0?'negative':''}">${moneySar(rem,m)}</td><td><button class="btn danger small" onclick="removeItem('budgets','${b.id}')">Delete</button></td></tr>`}).join(''):'<tr><td colspan="8" class="empty">No category budgets yet.</td></tr>'}
+function renderPlan(){const m=$('monthPicker').value,p=monthlyPlan(m),a=monthlyActual(m);$('planMonthLabel').textContent=monthLabel(m);$('pIncome').textContent=moneySar(p.income,m);$('pOut').textContent=moneySar(p.out,m);$('pActual').textContent=moneySar(a.expense,m);$('pRemaining').textContent=moneySar(p.income-p.out,m); const sections=[{name:'Fixed commitments',planned:p.fixed,actual:actualFixedSpendSar(m),desc:'Active recurring expenses'},{name:'Flexible spending',planned:p.flex,actual:state.budgets.filter(b=>b.bucket==='flex').reduce((s,b)=>s+budgetActual(b.category,m),0),desc:'Everyday variable categories'},{name:'Non-monthly',planned:p.nonmonthly+p.eventExpense,actual:state.budgets.filter(b=>b.bucket==='nonmonthly').reduce((s,b)=>s+budgetActual(b.category,m),0),desc:'Irregular / sinking-fund items'},{name:'Goals',planned:p.goals,actual:0,desc:'Reserved monthly contributions'}];$('planSummary').innerHTML=`<div class="plan-stack">${sections.map(x=>{const remaining=x.planned-x.actual,pct=x.planned?Math.min(140,x.actual/x.planned*100):0;return `<div class="plan-row"><div><div class="name">${x.name}</div><div class="muted" style="font-size:10px">${x.desc}</div></div><div class="bar ${pct>100?'bad':''}"><i style="width:${Math.min(100,pct)}%"></i></div><div class="amount">${moneySar(x.actual,m)} / ${moneySar(x.planned,m)}</div><div class="remaining ${remaining<0?'negative':'positive'}">${moneySar(remaining,m)}</div></div>`}).join('')}</div>`; $('budgetCount').textContent=`${state.budgets.length} budgets`; $('budgetTable').innerHTML=state.budgets.length?state.budgets.map(b=>{const plan=budgetAvailableSar(b,m),actual=budgetActual(b.category,m),rem=plan-actual,mode=b.scheduleMode||'ongoing';return `<tr><td>${esc(b.category)}</td><td>${badge(b.bucket)}</td><td>${mode==='month'?'One month':mode==='range'?'Range':'Ongoing'}</td><td>${b.startMonth||'—'}</td><td>${b.endMonth||'—'}</td><td>${b.rollover?'Yes':'No'}</td><td class="num">${moneySar(plan,m)}</td><td class="num">${moneySar(actual,m)}</td><td class="num ${rem<0?'negative':''}">${moneySar(rem,m)}</td><td><button class="btn danger small" onclick="removeItem('budgets','${b.id}')">Delete</button></td></tr>`}).join(''):'<tr><td colspan="10" class="empty">No category budgets yet.</td></tr>'}
 function renderTransactions(){let rows=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date));if(txFilter!=='all')rows=rows.filter(t=>t.type===txFilter);$('transactionCount').textContent=`${rows.length} transactions`; $('transactionTable').innerHTML=rows.length?rows.map(t=>`<tr><td>${t.date}</td><td>${esc(t.name)}</td><td>${badge(t.type)}</td><td>${esc(t.category)}</td><td>${esc(accountName(t.accountId))}</td><td class="num">${moneyNative(t.amount,t.currency)}</td><td class="num">${t.currency==='EGP'?n(t.fxRate).toFixed(3):'—'}</td><td class="num">${moneySar(t.sarAmount,monthOf(t.date))}</td><td>${esc(t.notes||'')}</td><td><div class="actions"><button class="btn soft small" onclick="promoteTransaction('${t.id}')">Make recurring</button><button class="btn danger small" onclick="removeItem('transactions','${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="10" class="empty">No transactions found.</td></tr>'; const source=$('rSourceTransaction'),sel=source.value;source.innerHTML='<option value="">Choose transaction...</option>'+[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<option value="${t.id}">${t.date} · ${esc(t.name)} · ${moneyNative(t.amount,t.currency)}</option>`).join('');if(state.transactions.some(t=>t.id===sel))source.value=sel}
 function renderRecurring(){const m=$('monthPicker').value;$('recurringCount').textContent=`${state.recurring.length} series`; $('recurringTable').innerHTML=state.recurring.length?state.recurring.map(r=>`<tr><td>${esc(r.name)}</td><td>${badge(r.type)}</td><td>${esc(r.category)}</td><td>${esc(r.frequency)}</td><td>${esc(accountName(r.accountId))}</td><td class="num">${moneyNative(r.amount,r.currency)}</td><td class="num">${moneyNative(recurringAmount(r,m),r.currency)}</td><td>${r.active?'<span class="badge b-active">Active</span>':'<span class="badge b-inactive">Paused</span>'}</td><td><div class="actions"><button class="btn soft small" onclick="changeRecurringAmount('${r.id}')">Change amount</button><button class="btn secondary small" onclick="toggleRecurring('${r.id}')">${r.active?'Pause':'Activate'}</button><button class="btn danger small" onclick="removeItem('recurring','${r.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="9" class="empty">No recurring items yet.</td></tr>'; const changes=[...state.changes].sort((a,b)=>b.effectiveMonth.localeCompare(a.effectiveMonth));$('changesTable').innerHTML=changes.length?changes.map(c=>{const r=state.recurring.find(x=>x.id===c.recurringId);return `<tr><td>${esc(r?.name||'Deleted item')}</td><td>${c.effectiveMonth}</td><td class="num">${r?moneyNative(c.oldAmount,r.currency):n(c.oldAmount)}</td><td class="num">${r?moneyNative(c.newAmount,r.currency):n(c.newAmount)}</td><td>${esc(c.reason||'')}</td><td><button class="btn danger small" onclick="removeItem('changes','${c.id}')">Delete</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">No amount changes yet.</td></tr>'; renderRecurringCandidates()}
 function renderRecurringCandidates(){const groups={};state.transactions.filter(t=>t.type!=='transfer').forEach(t=>{const k=`${t.type}|${String(t.name).trim().toLowerCase()}`;(groups[k]??=[]).push(t)});const candidates=Object.values(groups).filter(rows=>new Set(rows.map(t=>monthOf(t.date))).size>=2&&!state.recurring.some(r=>r.type===rows[0].type&&r.name.trim().toLowerCase()===rows[0].name.trim().toLowerCase())).map(rows=>{const avg=rows.reduce((s,t)=>s+n(t.sarAmount),0)/rows.length;return {rows,name:rows[0].name,type:rows[0].type,category:rows[0].category,avg,count:rows.length,last:[...rows].sort((a,b)=>b.date.localeCompare(a.date))[0]}}).sort((a,b)=>b.count-a.count).slice(0,6);$('recurringCandidates').innerHTML=candidates.length?candidates.map(c=>`<div class="bucket"><div><div class="name">${esc(c.name)}</div><div class="sub">${c.count} transactions · avg ${moneySar(c.avg,monthOf(c.last.date))} · ${esc(c.category)}</div></div><button class="btn soft small" onclick="promoteTransaction('${c.last.id}')">Create recurring</button></div>`).join(''):'<div class="empty">No repeated transaction pattern detected yet.</div>'}
@@ -315,14 +544,22 @@ function renderForecast(){const m=$('monthPicker').value,h=n($('sHorizon').value
 function renderGoals(){const m=$('monthPicker').value;$('goalCount').textContent=`${state.goals.length} goals`;$('goalGrid').innerHTML=state.goals.length?state.goals.map(g=>{const target=n(g.target),cur=n(g.current),pct=target?Math.min(100,cur/target*100):0,remain=Math.max(0,target-cur),months=Math.max(1,monthsBetween(m,g.dueMonth||m)+1),need=remain/months,status=n(g.monthlyContribution)>=need?'On pace':'Below pace';return `<div class="goal-card"><div class="goal-head"><div><b>${esc(g.name)}</b><div class="muted" style="font-size:10px;margin-top:3px">Target ${g.dueMonth||'—'}</div></div><span class="${status==='On pace'?'positive':'warning'}">${status}</span></div><div class="bar"><i style="width:${pct}%"></i></div><div class="goal-meta"><span>${moneyNative(cur,g.currency)} saved</span><span>${pct.toFixed(0)}%</span></div><div class="goal-meta"><span>Planned ${moneyNative(g.monthlyContribution,g.currency)}/mo</span><span>Needed ~${moneyNative(need,g.currency)}/mo</span></div><div class="actions" style="margin-top:10px"><button class="btn soft small" onclick="updateGoalCurrent('${g.id}')">Update saved</button><button class="btn danger small" onclick="removeItem('goals','${g.id}')">Delete</button></div></div>`}).join(''):'<div class="empty" style="grid-column:1/-1">No goals yet.</div>'}
 function renderAccounts(){const m=$('monthPicker').value,assets=state.accounts.filter(a=>!liabilityAccount(a)&&a.includeNetWorth!==false).reduce((s,a)=>s+accountSar(a,m),0),liabs=state.accounts.filter(a=>liabilityAccount(a)&&a.includeNetWorth!==false).reduce((s,a)=>s+Math.abs(accountSar(a,m)),0),liquid=liquidBalanceSar(m),nw=assets-liabs;$('aLiquid').textContent=moneySar(liquid,m);$('aAssets').textContent=moneySar(assets,m);$('aLiabilities').textContent=moneySar(liabs,m);$('aNetWorth').textContent=moneySar(nw,m);$('accountCount').textContent=`${state.accounts.length} accounts / assets`; $('accountGrid').innerHTML=state.accounts.length?state.accounts.map(a=>`<div class="account-card"><div class="top"><div><b>${esc(a.name)}</b><div class="type">${esc(a.type)}</div></div><span class="pill">${a.currency}</span></div><div class="balance ${liabilityAccount(a)?'negative':''}">${moneyNative(a.balance,a.currency)}</div><div class="converted">${moneySar(liabilityAccount(a)?-Math.abs(accountSar(a,m)):accountSar(a,m),m)} report value</div><div class="actions"><button class="btn soft small" onclick="updateAccountBalance('${a.id}')">Update balance</button><button class="btn danger small" onclick="removeItem('accounts','${a.id}')">Delete</button></div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Add at least one cash/bank account so forecasts have a starting balance.</div>'}
 function renderFx(){const rows=[...state.fxRates].sort((a,b)=>b.month.localeCompare(a.month));$('fxCount').textContent=`${rows.length} monthly rates`;$('fxTable').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.month}</td><td class="num">${n(x.rate).toFixed(4)}</td><td>${esc(x.note||'')}</td><td><button class="btn danger small" onclick="removeItem('fxRates','${x.id}')">Delete</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No monthly FX rates yet. The default rate will be used.</td></tr>'}
-function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderDashboard,renderPlan,renderRecurring,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
+function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderDecisionStrip,renderDashboard,renderMonthlyReview,renderPlan,renderRecurring,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
 function removeItem(type,idv){if(!confirm('Delete this record?'))return;state[type]=state[type].filter(x=>x.id!==idv);if(type==='recurring')state.changes=state.changes.filter(x=>x.recurringId!==idv);save()}
 function promoteTransaction(idv){const t=state.transactions.find(x=>x.id===idv);if(!t)return; $('rType').value=t.type==='income'?'income':'expense';$('rName').value=t.name;$('rCategory').value=t.category;$('rAmount').value=t.amount;$('rCurrency').value=t.currency;$('rAccount').value=t.accountId||'';$('rStart').value=monthOf(t.date);document.querySelector('[data-panel="recurring"]').click();window.scrollTo({top:0,behavior:'smooth'})}
 function changeRecurringAmount(idv){const r=state.recurring.find(x=>x.id===idv);if(!r)return;const month=prompt('Effective month (YYYY-MM):',$('monthPicker').value);if(!month||!/^[0-9]{4}-[0-9]{2}$/.test(month))return;const old=recurringAmount(r,month),val=prompt(`New amount (${r.currency}). Current: ${old}`,String(old));if(val===null||n(val)<=0)return;const reason=prompt('Reason for change (optional):','')||'';state.changes.push({id:id(),recurringId:r.id,effectiveMonth:month,oldAmount:old,newAmount:n(val),reason});save()}
 function toggleRecurring(idv){const r=state.recurring.find(x=>x.id===idv);if(r){r.active=!r.active;save()}}
 function updateGoalCurrent(idv){const g=state.goals.find(x=>x.id===idv);if(!g)return;const v=prompt(`Current saved amount (${g.currency})`,String(g.current));if(v===null)return;g.current=Math.max(0,n(v));save()}
 function updateAccountBalance(idv){const a=state.accounts.find(x=>x.id===idv);if(!a)return;const v=prompt(`Current balance (${a.currency})`,String(a.balance));if(v===null)return;a.balance=n(v);save()}
-$('monthPicker').value=currentMonth;$('reportCurrency').onchange=()=>{state.settings.reportCurrency=$('reportCurrency').value;save()};$('monthPicker').onchange=()=>{['bStart','rStart','fxMonth'].forEach(x=>{if(!$(x).value)$(x).value=$('monthPicker').value});renderAll()};
+$('monthPicker').value=currentMonth;
+$('reportCurrency').onchange=()=>{state.settings.reportCurrency=$('reportCurrency').value;save()};
+$('monthPicker').onchange=()=>{['bStart','rStart','fxMonth'].forEach(x=>{if(!$(x).value)$(x).value=$('monthPicker').value});renderAll()};
+$('prevMonthBtn').onclick=()=>{$('monthPicker').value=addMonths($('monthPicker').value,-1);renderAll()};
+$('nextMonthBtn').onclick=()=>{$('monthPicker').value=addMonths($('monthPicker').value,1);renderAll()};
+$('currentMonthBtn').onclick=()=>{$('monthPicker').value=currentMonth;renderAll()};
+$('navCollapseBtn').onclick=()=>document.body.classList.toggle('nav-collapsed');
+$('densityBtn').onclick=()=>{document.body.classList.toggle('compact');$('densityBtn').textContent=document.body.classList.contains('compact')?'Comfortable':'Compact'};
+$('focusBtn').onclick=()=>{document.body.classList.toggle('focus-mode');$('focusBtn').textContent=document.body.classList.contains('focus-mode')?'Show quick entry':'Focus mode'};
 $('quickAddBtn').onclick=()=>{
   const type=$('qType').value,name=$('qName').value.trim(),category=$('qCategory').value.trim()||(type==='income'?'Income':'Other'),date=$('qDate').value,amount=n($('qAmount').value),currency=$('qCurrency').value;
   if(!name||!date||amount<=0)return alert('Name, date and an amount above zero are required.');
@@ -341,7 +578,7 @@ $('quickAddBtn').onclick=()=>{
   ['qName','qCategory','qAmount','qFx'].forEach(x=>$(x).value='');$('qRecurring').value='no';
 };
 $('addTransactionBtn').onclick=async()=>{const amount=n($('tAmount').value),date=$('tDate').value,type=$('tType').value;if(!$('tName').value.trim()||!amount||!date)return alert('Name, date and amount are required.');const currency=$('tCurrency').value,fx=currency==='EGP'?(n($('tFx').value)||latestFx(monthOf(date))):1;const tx={id:id(),type,name:$('tName').value.trim(),category:$('tCategory').value.trim()||'Other',date,amount,currency,accountId:$('tAccount').value,fxRate:fx,sarAmount:toSAR(amount,currency,monthOf(date),fx),notes:$('tNotes').value.trim()};state.transactions.push(tx);$('monthPicker').value=monthOf(date);const btn=$('addTransactionBtn'),old=btn.textContent;btn.textContent='Saving…';btn.disabled=true;try{await save(`${type==='income'?'Income':'Transaction'} saved: ${tx.name}`);['tName','tCategory','tAmount','tFx','tNotes'].forEach(x=>$(x).value='');btn.textContent=`${type==='income'?'Income':'Transaction'} recorded ✓`;setTimeout(()=>{btn.textContent=old;btn.disabled=false},1100)}catch(e){btn.textContent='Save failed';btn.disabled=false}};
-$('addBudgetBtn').onclick=()=>{const amount=n($('bAmount').value),cat=$('bCategory').value.trim();if(!cat||!amount)return alert('Category and amount are required.');state.budgets.push({id:id(),category:cat,bucket:$('bBucket').value,amount,currency:$('bCurrency').value,startMonth:$('bStart').value||$('monthPicker').value,rollover:$('bRollover').value==='yes'});$('bCategory').value=$('bAmount').value='';save()};
+$('addBudgetBtn').onclick=()=>{const amount=n($('bAmount').value),cat=$('bCategory').value.trim();if(!cat||!amount)return alert('Category and amount are required.');const startMonth=$('bStart').value||$('monthPicker').value,mode=$('bMode').value,endMonth=mode==='month'?startMonth:$('bEnd').value;if(mode==='range'&&(!endMonth||endMonth<startMonth))return alert('For a custom range, choose an end month that is the same as or later than the start month.');state.budgets.push({id:id(),category:cat,bucket:$('bBucket').value,amount,currency:$('bCurrency').value,startMonth,endMonth,scheduleMode:mode,rollover:$('bRollover').value==='yes'});$('bCategory').value=$('bAmount').value='';$('bEnd').value='';save('Monthly plan updated')};
 $('estimateBudgetsBtn').onclick=()=>{const m=$('monthPicker').value,months=Array.from({length:6},(_,i)=>addMonths(m,i-6)),cats={};state.transactions.filter(t=>t.type==='expense'&&months.includes(monthOf(t.date))).forEach(t=>(cats[t.category]??=[]).push(t));const existing=new Set(state.budgets.map(b=>b.category));let added=0;Object.entries(cats).forEach(([cat,rows])=>{if(existing.has(cat)||state.recurring.some(r=>r.type==='expense'&&r.category===cat))return;const total=rows.reduce((s,t)=>s+n(t.sarAmount),0),avg=total/6;if(avg>0){state.budgets.push({id:id(),category:cat,bucket:'flex',amount:Math.round(avg),currency:'SAR',startMonth:m,rollover:false});added++}});save();alert(added?`${added} suggested budgets added from the last 6 months. Review and adjust them.`:'No new budget suggestions were available from your history.')};
 $('useTransactionBtn').onclick=()=>{if(!$('rSourceTransaction').value)return alert('Select a transaction first.');promoteTransaction($('rSourceTransaction').value)};
 $('addRecurringBtn').onclick=()=>{const amount=n($('rAmount').value),name=$('rName').value.trim();if(!name||!amount)return alert('Name and amount are required.');const type=$('rType').value,currency=$('rCurrency').value,accountId=$('rAccount').value,startMonth=$('rStart').value||$('monthPicker').value;const duplicate=state.recurring.some(r=>r.active&&r.type===type&&String(r.name).trim().toLowerCase()===name.toLowerCase()&&r.currency===currency&&n(r.amount)===amount&&(r.accountId||'')===(accountId||'')&&r.startMonth===startMonth);if(duplicate)return alert('This recurring item already exists with the same type, name, amount, currency, account and start month.');state.recurring.push({id:id(),type,name,category:$('rCategory').value.trim()||'Other',amount,currency,accountId,frequency:$('rFrequency').value,startMonth,day:Math.min(28,Math.max(1,n($('rDay').value)||1)),fixed:$('rFixed').value==='yes',active:true});['rName','rCategory','rAmount'].forEach(x=>$(x).value='');save()};
