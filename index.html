@@ -59,6 +59,13 @@ body.focus-mode #quickEntryCard{display:none}
 @media(max-width:1300px){.review-metrics{grid-template-columns:repeat(3,1fr)}.decision-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.review-metrics,.decision-grid{grid-template-columns:1fr 1fr}.control-line{grid-template-columns:110px 1fr}.control-line .amount{grid-column:2;text-align:right}.month-stepper{width:100%}}
 @media(max-width:470px){.review-metrics,.decision-grid{grid-template-columns:1fr}}
+
+/* What-if planning lab */
+.whatif-shell{display:grid;grid-template-columns:minmax(280px,.72fr) minmax(0,1.55fr);gap:14px}
+.scenario-list{display:grid;gap:8px;margin-top:10px}.scenario-card{border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff;cursor:pointer}.scenario-card.active{border-color:#aeb9ff;background:#f6f8ff}.scenario-card .top{display:flex;justify-content:space-between;gap:8px}.scenario-card b{font-size:12px}.scenario-card p{font-size:10px;color:var(--muted);margin:5px 0 0;line-height:1.4}.scenario-status{font-size:9px;font-weight:850;border-radius:999px;padding:4px 7px}.scenario-status.draft{background:#fff5e3;color:#9a6715}.scenario-status.approved{background:#eaf9f4;color:#087a55}
+.whatif-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.whatif-impact{font-size:10px;margin-top:4px;color:var(--muted)}.scenario-actions{display:flex;gap:8px;flex-wrap:wrap}.approval-box{border:1px solid #cfe8dd;background:#f4fbf8;border-radius:13px;padding:12px;font-size:11px;color:#386e5b;line-height:1.45}.draft-box{border:1px solid #e3dcbd;background:#fffaf0;border-radius:13px;padding:12px;font-size:11px;color:#766124;line-height:1.45}
+.whatif-table th,.whatif-table td{font-size:10px}.item-row{display:grid;grid-template-columns:1.4fr .8fr .7fr .8fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #eef1f5}.item-row:last-child{border-bottom:0}.item-row .name{font-size:11px;font-weight:800}.item-row .sub{font-size:9px;color:var(--muted);margin-top:2px}.impact-positive{color:var(--good)}.impact-negative{color:var(--bad)}
+@media(max-width:1050px){.whatif-shell{grid-template-columns:1fr}.whatif-metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.whatif-metrics{grid-template-columns:1fr}.item-row{grid-template-columns:1fr auto}.item-row .hide-small{display:none}}
 </style>
 </head>
 <body>
@@ -73,7 +80,8 @@ body.focus-mode #quickEntryCard{display:none}
     <button data-panel="transactions"><span class="ico">↕</span>Transactions</button>
     <button data-panel="recurring"><span class="ico">↻</span>Recurring</button>
     <div class="nav-label">Planning</div>
-    <button data-panel="forecast"><span class="ico">⌁</span>Forecast & Scenarios</button>
+    <button data-panel="whatif"><span class="ico">?</span>What-If Lab</button>
+    <button data-panel="forecast"><span class="ico">⌁</span>Forecast & Stress Tests</button>
     <button data-panel="goals"><span class="ico">◇</span>Goals</button>
     <button data-panel="accounts"><span class="ico">▣</span>Accounts & Net Worth</button>
     <div class="nav-label">Data</div>
@@ -96,7 +104,7 @@ body.focus-mode #quickEntryCard{display:none}
       <button class="btn secondary" id="focusBtn">Focus mode</button>
       <button class="btn secondary" id="densityBtn">Compact</button>
       <button class="btn secondary" id="demoBtn">Load demo</button>
-      <span class="pill" style="align-self:end;margin-bottom:1px">BUILD v6 · MONTHLY CONTROL</span>
+      <span class="pill" style="align-self:end;margin-bottom:1px">BUILD v6.1 · WHAT-IF PLANNING</span>
     </div>
   </div>
   <div id="dataStatus" class="notice good" style="margin-bottom:14px;padding:9px 12px">v5.0 · Connecting to Google Sheets…</div>
@@ -207,6 +215,63 @@ body.focus-mode #quickEntryCard{display:none}
     <div class="card" style="margin-top:14px"><div class="section-title"><h3>Amount change history</h3><span>Effective-month tracking</span></div><div class="table-wrap"><table><thead><tr><th>Recurring item</th><th>Effective month</th><th class="num">Old</th><th class="num">New</th><th>Reason</th><th></th></tr></thead><tbody id="changesTable"></tbody></table></div></div>
   </section>
 
+
+  <section class="panel" id="whatif">
+    <div class="whatif-shell">
+      <div>
+        <div class="card">
+          <div class="section-title"><div><h3>Create spending scenario</h3><span>Keep proposals separate from your approved plan</span></div><span class="pill">DRAFT FIRST</span></div>
+          <div class="grid">
+            <div class="field"><label>Scenario name</label><input id="wiName" placeholder="New laptop + December trip"></div>
+            <div class="field"><label>Why are you considering it?</label><textarea id="wiNotes" rows="3" placeholder="Optional notes or decision context"></textarea></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" id="createScenarioBtn">Create scenario</button></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="section-title"><h3>My scenarios</h3><span id="wiScenarioCount">0</span></div>
+          <div id="wiScenarioList" class="scenario-list"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="section-title"><div><h3 id="wiSelectedTitle">Select or create a scenario</h3><span id="wiSelectedSub">Nothing affects the real plan until approval.</span></div><div class="scenario-actions"><button class="btn danger small" id="deleteScenarioBtn" disabled>Delete</button><button class="btn primary" id="approveScenarioBtn" disabled>Approve as spend plan</button></div></div>
+          <div id="wiApprovalState" class="draft-box">Create a scenario, add proposed spending, then compare it against your baseline.</div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="section-title"><h3>Add proposed spend</h3><span>One-time or monthly</span></div>
+          <div class="grid form-grid">
+            <div class="field span2"><label>Spend item</label><input id="wiItemName" placeholder="Laptop, furniture, course, subscription..."></div>
+            <div class="field"><label>Category</label><input id="wiCategory" list="categoryList" placeholder="Shopping"></div>
+            <div class="field"><label>Amount</label><input id="wiAmount" type="number" min="0" step="0.01"></div>
+            <div class="field"><label>Currency</label><select id="wiCurrency"><option>SAR</option><option>EGP</option></select></div>
+            <div class="field"><label>Timing</label><select id="wiTiming"><option value="ONE_TIME">One-time</option><option value="MONTHLY">Monthly</option></select></div>
+            <div class="field"><label>Start month</label><input id="wiStart" type="month"></div>
+            <div class="field"><label>End month</label><input id="wiEnd" type="month"><span class="muted" style="font-size:9px">Optional for monthly; blank = ongoing</span></div>
+            <div class="field"><label>Planning bucket</label><select id="wiBucket"><option value="nonmonthly">Non-monthly / purchase</option><option value="flex">Flexible spending</option></select></div>
+            <div class="field span2"><label>Notes</label><input id="wiItemNotes" placeholder="Optional"></div>
+          </div>
+          <div class="form-actions"><button class="btn soft" id="addScenarioItemBtn" disabled>Add to scenario</button></div>
+        </div>
+
+        <div class="grid whatif-metrics" style="margin-top:14px">
+          <div class="card metric"><div class="label">Selected-month impact</div><div class="value" id="wiMonthCost">—</div><div class="sub" id="wiMonthCostSub">Additional planned spending</div></div>
+          <div class="card metric"><div class="label">12-month scenario cost</div><div class="value" id="wi12Cost">—</div><div class="sub">Total proposed spend in horizon</div></div>
+          <div class="card metric"><div class="label">Safe-to-spend after scenario</div><div class="value" id="wiSafe">—</div><div class="sub" id="wiSafeSub">Baseline less proposed spend</div></div>
+          <div class="card metric"><div class="label">12-month closing cash</div><div class="value" id="wiClosing">—</div><div class="sub" id="wiClosingSub">Scenario vs baseline</div></div>
+        </div>
+
+        <div class="grid half" style="margin-top:14px">
+          <div class="card chart"><div class="section-title"><h3>Baseline vs scenario cash path</h3><span>Next 12 months</span></div><div id="wiChart"></div></div>
+          <div class="card"><div class="section-title"><h3>Scenario items</h3><span id="wiItemCount">0</span></div><div id="wiItems"></div></div>
+        </div>
+
+        <div class="card" style="margin-top:14px"><div class="section-title"><h3>Month-by-month impact</h3><span>Nothing below is approved yet unless scenario status says APPROVED</span></div><div class="table-wrap"><table class="whatif-table"><thead><tr><th>Month</th><th class="num">Baseline outflow</th><th class="num">Scenario extra</th><th class="num">What-if outflow</th><th class="num">Baseline net</th><th class="num">What-if net</th><th class="num">Baseline closing</th><th class="num">What-if closing</th></tr></thead><tbody id="wiImpactTable"></tbody></table></div></div>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="forecast">
     <div class="card"><div class="section-title"><h3>What-if scenario</h3><span>Forecast without rewriting actual history</span></div><div class="scenario-tabs"><button class="active" data-scenario="base">Base plan</button><button data-scenario="conservative">Conservative</button><button data-scenario="lean">Lean spending</button><button data-scenario="custom">Custom</button></div><div class="scenario-controls"><div class="field"><label>Income multiplier</label><input id="sIncome" type="number" step="1" value="100"><span class="muted" style="font-size:10px">% of planned income</span></div><div class="field"><label>Fixed expense multiplier</label><input id="sFixed" type="number" step="1" value="100"><span class="muted" style="font-size:10px">% of recurring expenses</span></div><div class="field"><label>Flexible spending multiplier</label><input id="sFlex" type="number" step="1" value="100"><span class="muted" style="font-size:10px">% of category budgets</span></div><div class="field"><label>Forecast horizon</label><select id="sHorizon"><option value="6">6 months</option><option value="12" selected>12 months</option><option value="24">24 months</option><option value="36">36 months</option></select></div></div><div id="scenarioSummary" class="notice"></div></div>
     <div class="card chart" style="margin-top:14px"><div class="section-title"><h3>Projected liquid balance</h3><span id="forecastScenarioLabel">Base plan</span></div><div id="forecastChart"></div></div>
@@ -237,13 +302,13 @@ body.focus-mode #quickEntryCard{display:none}
 </main>
 </div>
 <script>
-const BUILD='v6.0.0 · Google Sheets';
+const BUILD='v6.1.0 · Google Sheets';
 const $=id=>document.getElementById(id); const n=v=>Number(v)||0; const id=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const today=new Date(); const currentMonth=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`; const isoToday=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-function blank(){return {version:2,settings:{defaultFx:13,reportCurrency:'SAR',projectStartDate:'2026-10-01'},accounts:[],transactions:[],recurring:[],changes:[],budgets:[],goals:[],events:[],fxRates:[]}}
-function normalizeState(raw){const b=blank(),x=raw&&typeof raw==='object'?raw:{}; const out={...b,...x,settings:{...b.settings,...(x.settings||{})}}; ['accounts','transactions','recurring','changes','budgets','goals','events','fxRates'].forEach(k=>out[k]=Array.isArray(x[k])?x[k]:[]); out.transactions=out.transactions.map(t=>({...t,type:t.type||'expense',category:t.category||'Other',accountId:t.accountId||'',fxRate:n(t.fxRate)||1,sarAmount:Number.isFinite(Number(t.sarAmount))?Number(t.sarAmount):n(t.amount)})); out.recurring=out.recurring.map(r=>({...r,frequency:r.frequency||'monthly',day:n(r.day)||1,accountId:r.accountId||'',active:r.active!==false,fixed:r.fixed!==false})); return out}
+function blank(){return {version:2,settings:{defaultFx:13,reportCurrency:'SAR',projectStartDate:'2026-10-01'},accounts:[],transactions:[],recurring:[],changes:[],budgets:[],goals:[],events:[],fxRates:[],spendScenarios:[],scenarioItems:[]}}
+function normalizeState(raw){const b=blank(),x=raw&&typeof raw==='object'?raw:{}; const out={...b,...x,settings:{...b.settings,...(x.settings||{})}}; ['accounts','transactions','recurring','changes','budgets','goals','events','fxRates','spendScenarios','scenarioItems'].forEach(k=>out[k]=Array.isArray(x[k])?x[k]:[]); out.transactions=out.transactions.map(t=>({...t,type:t.type||'expense',category:t.category||'Other',accountId:t.accountId||'',fxRate:n(t.fxRate)||1,sarAmount:Number.isFinite(Number(t.sarAmount))?Number(t.sarAmount):n(t.amount)})); out.recurring=out.recurring.map(r=>({...r,frequency:r.frequency||'monthly',day:n(r.day)||1,accountId:r.accountId||'',active:r.active!==false,fixed:r.fixed!==false})); return out}
 let storageMode='Google Sheets';
-let state=blank(); let txFilter='all'; let scenario='base'; let lastSavedText='';
+let state=blank(); let txFilter='all'; let scenario='base'; let whatIfScenarioId=''; let lastSavedText='';
 let saveChain=Promise.resolve();
 
 function projectStartDate(){return state.settings.projectStartDate||'2026-10-01'}
@@ -371,7 +436,7 @@ function setDefaults(){
   const psd=projectStartDate(),psm=projectStartMonth(),dm=projectDefaultMonth(),dd=projectDefaultDate();
   $('monthPicker').min=psm;
   if(!$('monthPicker').value||$('monthPicker').value<psm)$('monthPicker').value=dm;
-  ['bStart','rStart','fxMonth'].forEach(x=>{const el=$(x);el.min=psm;if(!el.value||el.value<psm)el.value=$('monthPicker').value});
+  ['bStart','rStart','fxMonth','wiStart'].forEach(x=>{const el=$(x);if(!el)return;el.min=psm;if(!el.value||el.value<psm)el.value=$('monthPicker').value});if($('wiEnd'))$('wiEnd').min=psm;
   if($('bEnd'))$('bEnd').min=psm;
   if($('bMode')&&!$('bMode').value)$('bMode').value='ongoing';
   ['tDate','qDate','eDate'].forEach(x=>{const el=$(x);el.min=psd;if(!el.value||el.value<psd)el.value=dd});
@@ -385,7 +450,7 @@ function setDefaults(){
 function badge(type){const cls={income:'b-income',expense:'b-expense',transfer:'b-active',fixed:'b-fixed',flex:'b-flex',nonmonthly:'b-nonmonthly'}[type]||'b-active'; const label={nonmonthly:'Non-monthly'}[type]||type; return `<span class="badge ${cls}">${esc(label)}</span>`}
 function lineChart(el,rows){if(!rows.length){el.innerHTML='<div class="empty">Add account balances and planning data to build a forecast.</div>';return} const W=760,H=230,p={l:50,r:18,t:16,b:34}, vals=rows.map(r=>r.closing), min=Math.min(0,...vals),max=Math.max(1,...vals), range=max-min||1; const x=i=>p.l+i*(W-p.l-p.r)/Math.max(1,rows.length-1), y=v=>p.t+(max-v)*(H-p.t-p.b)/range; const points=rows.map((r,i)=>`${x(i)},${y(r.closing)}`).join(' '); const zero=y(0); const grids=[0,.25,.5,.75,1].map(q=>{const v=min+range*q, yy=y(v);return `<line x1="${p.l}" y1="${yy}" x2="${W-p.r}" y2="${yy}" stroke="#edf0f6"/><text x="${p.l-7}" y="${yy+3}" text-anchor="end" font-size="9" fill="#8a93a6">${Math.round(fromSAR(v,rows[0].month)/1000)}k</text>`}).join(''); const labels=rows.map((r,i)=>i%(rows.length>12?3:2)===0?`<text x="${x(i)}" y="${H-9}" text-anchor="middle" font-size="9" fill="#8a93a6">${monthLabel(r.month)}</text>`:'').join(''); const dots=rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.closing)}" r="3" fill="${r.net<0?'#dc5263':'#5568f0'}"><title>${monthLabel(r.month)}: ${moneySar(r.closing,r.month)}</title></circle>`).join(''); el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grids}<line x1="${p.l}" y1="${zero}" x2="${W-p.r}" y2="${zero}" stroke="#cdd3df" stroke-dasharray="4 4"/><polyline fill="none" stroke="#5568f0" stroke-width="3" points="${points}"/>${dots}${labels}</svg>`}
 function barTrend(el,months){const vals=months.map(m=>monthlyActual(m)),max=Math.max(1,...vals.flatMap(v=>[v.income,v.expense])); const W=760,H=230,p={l:40,r:15,t:15,b:32}, group=(W-p.l-p.r)/months.length; const bars=months.map((m,i)=>{const a=vals[i], bw=Math.max(8,group*.28), x0=p.l+i*group+group*.18, hi=(a.income/max)*(H-p.t-p.b), he=(a.expense/max)*(H-p.t-p.b);return `<rect x="${x0}" y="${H-p.b-hi}" width="${bw}" height="${hi}" rx="3" fill="#0f9f6e"><title>Income ${moneySar(a.income,m)}</title></rect><rect x="${x0+bw+4}" y="${H-p.b-he}" width="${bw}" height="${he}" rx="3" fill="#dc5263"><title>Spend ${moneySar(a.expense,m)}</title></rect><text x="${p.l+i*group+group/2}" y="${H-9}" text-anchor="middle" font-size="9" fill="#8a93a6">${monthLabel(m)}</text>`}).join(''); el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${p.l}" y1="${H-p.b}" x2="${W-p.r}" y2="${H-p.b}" stroke="#dfe4ed"/>${bars}</svg><div class="legend"><span><i class="l3"></i>Income</span><span><i class="l2"></i>Expenses</span></div>`}
-function renderNav(){document.querySelectorAll('.nav button[data-panel]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(b.dataset.panel).classList.add('active');$('pageTitle').textContent=b.textContent.trim(); const subs={dashboard:'See what happened, what is planned, and what happens next.',monthly:'Understand one month clearly, compare it with history, and see what is still committed.',plan:'Build a monthly spending plan, not just a transaction log.',transactions:'Record actual income, spending and transfers.',recurring:'Turn repeated transactions into future commitments.',forecast:'Model the future and stress-test your plan.',goals:'Make savings obligations visible in the monthly plan.',accounts:'Track liquid cash, assets, liabilities and net worth.',fx:'Control the SAR/EGP assumptions used by history and forecasts.',settings:'Manage defaults and portable backups.'};$('pageSubtitle').textContent=subs[b.dataset.panel]||''; window.scrollTo({top:0,behavior:'smooth'})})}
+function renderNav(){document.querySelectorAll('.nav button[data-panel]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(b.dataset.panel).classList.add('active');$('pageTitle').textContent=b.textContent.trim(); const subs={dashboard:'See what happened, what is planned, and what happens next.',monthly:'Understand one month clearly, compare it with history, and see what is still committed.',plan:'Build a monthly spending plan, not just a transaction log.',transactions:'Record actual income, spending and transfers.',recurring:'Turn repeated transactions into future commitments.',whatif:'Test proposed spending before it becomes part of your real plan.',forecast:'Model the future and stress-test your plan.',goals:'Make savings obligations visible in the monthly plan.',accounts:'Track liquid cash, assets, liabilities and net worth.',fx:'Control the SAR/EGP assumptions used by history and forecasts.',settings:'Manage defaults and portable backups.'};$('pageSubtitle').textContent=subs[b.dataset.panel]||''; window.scrollTo({top:0,behavior:'smooth'})})}
 function renderAccountOptions(){const opts='<option value="">Unassigned</option>'+state.accounts.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.currency}</option>`).join(''); ['qAccount','tAccount','rAccount','eAccount','gAccount'].forEach(idv=>{const el=$(idv),v=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===v))el.value=v})}
 function renderSpendComposition(month){
   const rows=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month);
@@ -558,11 +623,75 @@ function renderPlan(){const m=$('monthPicker').value,p=monthlyPlan(m),a=monthlyA
 function renderTransactions(){let rows=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date));if(txFilter!=='all')rows=rows.filter(t=>t.type===txFilter);$('transactionCount').textContent=`${rows.length} transactions`; $('transactionTable').innerHTML=rows.length?rows.map(t=>`<tr><td>${t.date}</td><td>${esc(t.name)}</td><td>${badge(t.type)}</td><td>${esc(t.category)}</td><td>${esc(accountName(t.accountId))}</td><td class="num">${moneyNative(t.amount,t.currency)}</td><td class="num">${t.currency==='EGP'?n(t.fxRate).toFixed(3):'—'}</td><td class="num">${moneySar(t.sarAmount,monthOf(t.date))}</td><td>${esc(t.notes||'')}</td><td><div class="actions"><button class="btn soft small" onclick="promoteTransaction('${t.id}')">Make recurring</button><button class="btn danger small" onclick="removeItem('transactions','${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="10" class="empty">No transactions found.</td></tr>'; const source=$('rSourceTransaction'),sel=source.value;source.innerHTML='<option value="">Choose transaction...</option>'+[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<option value="${t.id}">${t.date} · ${esc(t.name)} · ${moneyNative(t.amount,t.currency)}</option>`).join('');if(state.transactions.some(t=>t.id===sel))source.value=sel}
 function renderRecurring(){const m=$('monthPicker').value;$('recurringCount').textContent=`${state.recurring.length} series`; $('recurringTable').innerHTML=state.recurring.length?state.recurring.map(r=>`<tr><td>${esc(r.name)}</td><td>${badge(r.type)}</td><td>${esc(r.category)}</td><td>${esc(r.frequency)}</td><td>${esc(accountName(r.accountId))}</td><td class="num">${moneyNative(r.amount,r.currency)}</td><td class="num">${moneyNative(recurringAmount(r,m),r.currency)}</td><td>${r.active?'<span class="badge b-active">Active</span>':'<span class="badge b-inactive">Paused</span>'}</td><td><div class="actions"><button class="btn soft small" onclick="changeRecurringAmount('${r.id}')">Change amount</button><button class="btn secondary small" onclick="toggleRecurring('${r.id}')">${r.active?'Pause':'Activate'}</button><button class="btn danger small" onclick="removeItem('recurring','${r.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="9" class="empty">No recurring items yet.</td></tr>'; const changes=[...state.changes].sort((a,b)=>b.effectiveMonth.localeCompare(a.effectiveMonth));$('changesTable').innerHTML=changes.length?changes.map(c=>{const r=state.recurring.find(x=>x.id===c.recurringId);return `<tr><td>${esc(r?.name||'Deleted item')}</td><td>${c.effectiveMonth}</td><td class="num">${r?moneyNative(c.oldAmount,r.currency):n(c.oldAmount)}</td><td class="num">${r?moneyNative(c.newAmount,r.currency):n(c.newAmount)}</td><td>${esc(c.reason||'')}</td><td><button class="btn danger small" onclick="removeItem('changes','${c.id}')">Delete</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">No amount changes yet.</td></tr>'; renderRecurringCandidates()}
 function renderRecurringCandidates(){const groups={};state.transactions.filter(t=>t.type!=='transfer').forEach(t=>{const k=`${t.type}|${String(t.name).trim().toLowerCase()}`;(groups[k]??=[]).push(t)});const candidates=Object.values(groups).filter(rows=>new Set(rows.map(t=>monthOf(t.date))).size>=2&&!state.recurring.some(r=>r.type===rows[0].type&&r.name.trim().toLowerCase()===rows[0].name.trim().toLowerCase())).map(rows=>{const avg=rows.reduce((s,t)=>s+n(t.sarAmount),0)/rows.length;return {rows,name:rows[0].name,type:rows[0].type,category:rows[0].category,avg,count:rows.length,last:[...rows].sort((a,b)=>b.date.localeCompare(a.date))[0]}}).sort((a,b)=>b.count-a.count).slice(0,6);$('recurringCandidates').innerHTML=candidates.length?candidates.map(c=>`<div class="bucket"><div><div class="name">${esc(c.name)}</div><div class="sub">${c.count} transactions · avg ${moneySar(c.avg,monthOf(c.last.date))} · ${esc(c.category)}</div></div><button class="btn soft small" onclick="promoteTransaction('${c.last.id}')">Create recurring</button></div>`).join(''):'<div class="empty">No repeated transaction pattern detected yet.</div>'}
+
+function selectedSpendScenario(){return state.spendScenarios.find(x=>x.id===whatIfScenarioId)||null}
+function scenarioItemApplies(x,month){
+  if(!x.startMonth||month<x.startMonth)return false;
+  if((x.timing||'ONE_TIME')==='ONE_TIME')return month===x.startMonth;
+  if(x.endMonth&&month>x.endMonth)return false;
+  return true
+}
+function scenarioExtraSar(scenarioId,month){
+  return state.scenarioItems.filter(x=>x.scenarioId===scenarioId&&scenarioItemApplies(x,month)).reduce((sum,x)=>sum+toSAR(x.amount,x.currency,month),0)
+}
+function whatIfRows(scenarioId,startMonth,horizon=12){
+  const base=forecastRows(startMonth,horizon,{income:1,fixed:1,flex:1});
+  let cumulative=0;
+  return base.map(r=>{const extra=scenarioExtraSar(scenarioId,r.month);cumulative+=extra;return {...r,extra,whatIfOut:r.out+extra,whatIfNet:r.net-extra,whatIfClosing:r.closing-cumulative}})
+}
+function dualCashChart(el,rows){
+  if(!rows.length){el.innerHTML='<div class="empty">Add a scenario item to compare cash paths.</div>';return}
+  const W=760,H=230,p={l:52,r:18,t:18,b:34},vals=rows.flatMap(r=>[r.closing,r.whatIfClosing]),min=Math.min(0,...vals),max=Math.max(1,...vals),range=max-min||1;
+  const x=i=>p.l+i*(W-p.l-p.r)/Math.max(1,rows.length-1),y=v=>p.t+(max-v)*(H-p.t-p.b)/range;
+  const base=rows.map((r,i)=>`${x(i)},${y(r.closing)}`).join(' '),wi=rows.map((r,i)=>`${x(i)},${y(r.whatIfClosing)}`).join(' ');
+  const grids=[0,.25,.5,.75,1].map(q=>{const v=min+range*q,yy=y(v);return `<line x1="${p.l}" y1="${yy}" x2="${W-p.r}" y2="${yy}" stroke="#edf0f6"/><text x="${p.l-7}" y="${yy+3}" text-anchor="end" font-size="9" fill="#8a93a6">${Math.round(fromSAR(v,rows[0].month)/1000)}k</text>`}).join('');
+  const labels=rows.map((r,i)=>i%2===0?`<text x="${x(i)}" y="${H-9}" text-anchor="middle" font-size="9" fill="#8a93a6">${monthLabel(r.month)}</text>`:'').join('');
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grids}<polyline fill="none" stroke="#5568f0" stroke-width="3" points="${base}"/><polyline fill="none" stroke="#dc5263" stroke-width="3" stroke-dasharray="6 4" points="${wi}"/>${labels}</svg><div class="legend"><span><i class="l1"></i>Baseline</span><span><i class="l2"></i>What-if</span></div>`
+}
+function renderWhatIf(){
+  const list=$('wiScenarioList'),count=$('wiScenarioCount');
+  const scenarios=[...state.spendScenarios].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  count.textContent=`${scenarios.length} scenario${scenarios.length===1?'':'s'}`;
+  if(whatIfScenarioId&&!scenarios.some(x=>x.id===whatIfScenarioId))whatIfScenarioId='';
+  if(!whatIfScenarioId&&scenarios.length)whatIfScenarioId=scenarios[0].id;
+  list.innerHTML=scenarios.length?scenarios.map(x=>`<div class="scenario-card ${x.id===whatIfScenarioId?'active':''}" onclick="selectSpendScenario('${x.id}')"><div class="top"><b>${esc(x.name)}</b><span class="scenario-status ${String(x.status).toLowerCase()}">${esc(x.status||'DRAFT')}</span></div><p>${esc(x.notes||'No notes')}</p></div>`).join(''):'<div class="empty">No spending scenarios yet.</div>';
+  const sc=selectedSpendScenario();
+  const buttons=['deleteScenarioBtn','approveScenarioBtn','addScenarioItemBtn'];buttons.forEach(x=>$(x).disabled=!sc);
+  if(!sc){
+    $('wiSelectedTitle').textContent='Select or create a scenario';$('wiSelectedSub').textContent='Nothing affects the real plan until approval.';$('wiApprovalState').className='draft-box';$('wiApprovalState').textContent='Create a scenario, add proposed spending, then compare it against your baseline.';
+    ['wiMonthCost','wi12Cost','wiSafe','wiClosing'].forEach(x=>$(x).textContent='—');$('wiItems').innerHTML='<div class="empty">No scenario selected.</div>';$('wiImpactTable').innerHTML='<tr><td colspan="8" class="empty">No scenario selected.</td></tr>';$('wiChart').innerHTML='<div class="empty">No scenario selected.</div>';$('wiItemCount').textContent='0';return
+  }
+  const approved=sc.status==='APPROVED';$('approveScenarioBtn').disabled=approved;$('addScenarioItemBtn').disabled=approved;
+  $('wiSelectedTitle').textContent=sc.name;$('wiSelectedSub').textContent=sc.notes||'Proposed spending scenario';
+  $('wiApprovalState').className=approved?'approval-box':'draft-box';
+  $('wiApprovalState').innerHTML=approved?`<b>APPROVED SPEND PLAN</b> · Approved ${sc.approvedAt?new Date(sc.approvedAt).toLocaleString():'previously'}. The approved items are now part of Monthly Plan.`:'<b>DRAFT</b> · This scenario is isolated from the real plan. Review its impact below, then approve only if you are comfortable with it.';
+  const items=state.scenarioItems.filter(x=>x.scenarioId===sc.id);$('wiItemCount').textContent=`${items.length} item${items.length===1?'':'s'}`;
+  $('wiItems').innerHTML=items.length?items.map(x=>`<div class="item-row"><div><div class="name">${esc(x.name)}</div><div class="sub">${esc(x.category)} · ${x.timing==='MONTHLY'?'Monthly':'One-time'} · ${x.startMonth}${x.endMonth?' → '+x.endMonth:''}</div></div><div class="hide-small">${moneyNative(x.amount,x.currency)}</div><div class="hide-small">${esc(x.bucket)}</div><div class="hide-small">${esc(x.notes||'')}</div><button class="btn danger small" ${approved?'disabled':''} onclick="removeScenarioItem('${x.id}')">Delete</button></div>`).join(''):'<div class="empty">Add one or more proposed spending items.</div>';
+  const m=$('monthPicker').value,rows=whatIfRows(sc.id,m,12),monthExtra=scenarioExtraSar(sc.id,m),cost12=rows.reduce((sum,r)=>sum+r.extra,0),control=monthControl(m),safe=control.safe-monthExtra,end=rows.at(-1),baselineEnd=end?.closing||0,whatEnd=end?.whatIfClosing||0;
+  $('wiMonthCost').textContent=moneySar(monthExtra,m);$('wi12Cost').textContent=moneySar(cost12,m);$('wiSafe').textContent=moneySar(safe,m);$('wiSafe').className='value '+(safe<0?'negative':'positive');$('wiClosing').textContent=moneySar(whatEnd,end?.month||m);$('wiClosing').className='value '+(whatEnd<0?'negative':'positive');
+  $('wiMonthCostSub').textContent=monthExtra?'Additional spend in selected month':'No scenario spending in selected month';$('wiSafeSub').textContent=`Baseline safe-to-spend: ${moneySar(control.safe,m)}`;$('wiClosingSub').textContent=`Baseline: ${moneySar(baselineEnd,end?.month||m)} · impact: -${moneySar(Math.max(0,baselineEnd-whatEnd),end?.month||m)}`;
+  dualCashChart($('wiChart'),rows);
+  $('wiImpactTable').innerHTML=rows.map(r=>`<tr><td>${monthLabel(r.month)}</td><td class="num">${moneySar(r.out,r.month)}</td><td class="num ${r.extra>0?'negative':''}">${r.extra?'+':''}${moneySar(r.extra,r.month)}</td><td class="num">${moneySar(r.whatIfOut,r.month)}</td><td class="num ${r.net<0?'negative':'positive'}">${moneySar(r.net,r.month)}</td><td class="num ${r.whatIfNet<0?'negative':'positive'}">${moneySar(r.whatIfNet,r.month)}</td><td class="num">${moneySar(r.closing,r.month)}</td><td class="num ${r.whatIfClosing<0?'negative':''}">${moneySar(r.whatIfClosing,r.month)}</td></tr>`).join('');
+}
+function selectSpendScenario(idv){whatIfScenarioId=idv;renderWhatIf()}
+function removeScenarioItem(idv){const sc=selectedSpendScenario();if(!sc||sc.status==='APPROVED')return;state.scenarioItems=state.scenarioItems.filter(x=>x.id!==idv);save('Scenario item removed')}
+function deleteSpendScenario(){
+  const sc=selectedSpendScenario();if(!sc)return;if(sc.status==='APPROVED')return alert('Approved scenarios are retained as an audit trail and cannot be deleted.');
+  if(!confirm(`Delete scenario "${sc.name}" and all of its proposed items?`))return;
+  state.spendScenarios=state.spendScenarios.filter(x=>x.id!==sc.id);state.scenarioItems=state.scenarioItems.filter(x=>x.scenarioId!==sc.id);whatIfScenarioId='';save('Scenario deleted')
+}
+function approveSpendScenario(){
+  const sc=selectedSpendScenario();if(!sc||sc.status==='APPROVED')return;const items=state.scenarioItems.filter(x=>x.scenarioId===sc.id);if(!items.length)return alert('Add at least one proposed spending item before approval.');
+  if(!confirm(`Approve "${sc.name}" and add ${items.length} item${items.length===1?'':'s'} to the real Monthly Plan?`))return;
+  items.forEach(x=>{const one=x.timing!=='MONTHLY';state.budgets.push({id:id(),category:x.category||'Other',bucket:x.bucket||'nonmonthly',amount:n(x.amount),currency:x.currency||'SAR',startMonth:x.startMonth,endMonth:one?x.startMonth:(x.endMonth||''),scheduleMode:one?'month':(x.endMonth?'range':'ongoing'),rollover:false,notes:`Approved scenario: ${sc.name} · ${x.name} [scenario:${sc.id}]`})});
+  sc.status='APPROVED';sc.approvedAt=new Date().toISOString();save(`Scenario approved: ${sc.name}`)
+}
+
 function renderForecast(){const m=$('monthPicker').value,h=n($('sHorizon').value)||12,mods=scenarioMods(),rows=forecastRows(m,h,mods);lineChart($('forecastChart'),rows);const labels={base:'Base plan',conservative:'Conservative',lean:'Lean spending',custom:'Custom'};$('forecastScenarioLabel').textContent=labels[scenario]; const end=rows.at(-1),lowest=rows.reduce((a,b)=>a.closing<b.closing?a:b,rows[0]||{closing:0,month:m}),neg=rows.find(r=>r.closing<0);$('scenarioSummary').innerHTML=`<b>${labels[scenario]}</b> projects a closing liquid balance of <b>${moneySar(end?.closing||0,end?.month||m)}</b> after ${h} months. ${neg?`Cash turns negative in <b>${monthLabel(neg.month)}</b>.`:`Lowest projected balance is <b>${moneySar(lowest?.closing||0,lowest?.month||m)}</b>.`}`;$('forecastTable').innerHTML=rows.map(r=>`<tr><td>${monthLabel(r.month)}</td><td class="num positive">${moneySar(r.income,r.month)}</td><td class="num">${moneySar(r.fixed,r.month)}</td><td class="num">${moneySar(r.flex,r.month)}</td><td class="num">${moneySar(r.nonmonthly,r.month)}</td><td class="num">${moneySar(r.goals,r.month)}</td><td class="num">${moneySar(r.eventExpense-r.eventIncome,r.month)}</td><td class="num ${r.net<0?'negative':'positive'}">${moneySar(r.net,r.month)}</td><td class="num ${r.closing<0?'negative':''}">${moneySar(r.closing,r.month)}</td></tr>`).join('');$('eventCount').textContent=`${state.events.length} events`;$('eventList').innerHTML=state.events.length?[...state.events].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<div class="bucket"><div><div class="name">${esc(e.name)}</div><div class="sub">${e.date} · ${esc(e.category||'Other')} · ${esc(accountName(e.accountId))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="amt ${e.type==='expense'?'negative':'positive'}">${e.type==='expense'?'-':'+'}${moneyNative(e.amount,e.currency)}</div><button class="btn danger small" onclick="removeItem('events','${e.id}')">Delete</button></div></div>`).join(''):'<div class="empty">No future one-time events.</div>'}
 function renderGoals(){const m=$('monthPicker').value;$('goalCount').textContent=`${state.goals.length} goals`;$('goalGrid').innerHTML=state.goals.length?state.goals.map(g=>{const target=n(g.target),cur=n(g.current),pct=target?Math.min(100,cur/target*100):0,remain=Math.max(0,target-cur),months=Math.max(1,monthsBetween(m,g.dueMonth||m)+1),need=remain/months,status=n(g.monthlyContribution)>=need?'On pace':'Below pace';return `<div class="goal-card"><div class="goal-head"><div><b>${esc(g.name)}</b><div class="muted" style="font-size:10px;margin-top:3px">Target ${g.dueMonth||'—'}</div></div><span class="${status==='On pace'?'positive':'warning'}">${status}</span></div><div class="bar"><i style="width:${pct}%"></i></div><div class="goal-meta"><span>${moneyNative(cur,g.currency)} saved</span><span>${pct.toFixed(0)}%</span></div><div class="goal-meta"><span>Planned ${moneyNative(g.monthlyContribution,g.currency)}/mo</span><span>Needed ~${moneyNative(need,g.currency)}/mo</span></div><div class="actions" style="margin-top:10px"><button class="btn soft small" onclick="updateGoalCurrent('${g.id}')">Update saved</button><button class="btn danger small" onclick="removeItem('goals','${g.id}')">Delete</button></div></div>`}).join(''):'<div class="empty" style="grid-column:1/-1">No goals yet.</div>'}
 function renderAccounts(){const m=$('monthPicker').value,assets=state.accounts.filter(a=>!liabilityAccount(a)&&a.includeNetWorth!==false).reduce((s,a)=>s+accountSar(a,m),0),liabs=state.accounts.filter(a=>liabilityAccount(a)&&a.includeNetWorth!==false).reduce((s,a)=>s+Math.abs(accountSar(a,m)),0),liquid=liquidBalanceSar(m),nw=assets-liabs;$('aLiquid').textContent=moneySar(liquid,m);$('aAssets').textContent=moneySar(assets,m);$('aLiabilities').textContent=moneySar(liabs,m);$('aNetWorth').textContent=moneySar(nw,m);$('accountCount').textContent=`${state.accounts.length} accounts / assets`; $('accountGrid').innerHTML=state.accounts.length?state.accounts.map(a=>`<div class="account-card"><div class="top"><div><b>${esc(a.name)}</b><div class="type">${esc(a.type)}</div></div><span class="pill">${a.currency}</span></div><div class="balance ${liabilityAccount(a)?'negative':''}">${moneyNative(a.balance,a.currency)}</div><div class="converted">${moneySar(liabilityAccount(a)?-Math.abs(accountSar(a,m)):accountSar(a,m),m)} report value</div><div class="actions"><button class="btn soft small" onclick="updateAccountBalance('${a.id}')">Update balance</button><button class="btn danger small" onclick="removeItem('accounts','${a.id}')">Delete</button></div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Add at least one cash/bank account so forecasts have a starting balance.</div>'}
 function renderFx(){const rows=[...state.fxRates].sort((a,b)=>b.month.localeCompare(a.month));$('fxCount').textContent=`${rows.length} monthly rates`;$('fxTable').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.month}</td><td class="num">${n(x.rate).toFixed(4)}</td><td>${esc(x.note||'')}</td><td><button class="btn danger small" onclick="removeItem('fxRates','${x.id}')">Delete</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No monthly FX rates yet. The default rate will be used.</td></tr>'}
-function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderDecisionStrip,renderDashboard,renderMonthlyReview,renderPlan,renderRecurring,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
+function renderAll(){setDefaults();renderAccountOptions();const renderers=[renderTransactions,renderDecisionStrip,renderDashboard,renderMonthlyReview,renderPlan,renderRecurring,renderWhatIf,renderForecast,renderGoals,renderAccounts,renderFx];renderers.forEach(fn=>{try{fn()}catch(err){console.error('Render failed:',fn.name,err)}});updateDataStatus('Ready')}
 function removeItem(type,idv){if(!confirm('Delete this record?'))return;state[type]=state[type].filter(x=>x.id!==idv);if(type==='recurring')state.changes=state.changes.filter(x=>x.recurringId!==idv);save()}
 function promoteTransaction(idv){const t=state.transactions.find(x=>x.id===idv);if(!t)return; $('rType').value=t.type==='income'?'income':'expense';$('rName').value=t.name;$('rCategory').value=t.category;$('rAmount').value=t.amount;$('rCurrency').value=t.currency;$('rAccount').value=t.accountId||'';$('rStart').value=monthOf(t.date);document.querySelector('[data-panel="recurring"]').click();window.scrollTo({top:0,behavior:'smooth'})}
 function changeRecurringAmount(idv){const r=state.recurring.find(x=>x.id===idv);if(!r)return;const month=prompt('Effective month (YYYY-MM):',$('monthPicker').value);if(!month||!/^[0-9]{4}-[0-9]{2}$/.test(month))return;if(month<projectStartMonth())return alert('Recurring changes cannot be effective before October 2026.');const old=recurringAmount(r,month),val=prompt(`New amount (${r.currency}). Current: ${old}`,String(old));if(val===null||n(val)<=0)return;const reason=prompt('Reason for change (optional):','')||'';state.changes.push({id:id(),recurringId:r.id,effectiveMonth:month,oldAmount:old,newAmount:n(val),reason});save()}
@@ -578,6 +707,9 @@ $('currentMonthBtn').onclick=()=>{$('monthPicker').value=projectDefaultMonth();r
 $('navCollapseBtn').onclick=()=>document.body.classList.toggle('nav-collapsed');
 $('densityBtn').onclick=()=>{document.body.classList.toggle('compact');$('densityBtn').textContent=document.body.classList.contains('compact')?'Comfortable':'Compact'};
 $('focusBtn').onclick=()=>{document.body.classList.toggle('focus-mode');$('focusBtn').textContent=document.body.classList.contains('focus-mode')?'Show quick entry':'Focus mode'};
+$('createScenarioBtn').onclick=()=>{const name=$('wiName').value.trim();if(!name)return alert('Scenario name is required.');const sc={id:id(),name,notes:$('wiNotes').value.trim(),status:'DRAFT',approvedAt:'',createdAt:new Date().toISOString()};state.spendScenarios.push(sc);whatIfScenarioId=sc.id;$('wiName').value='';$('wiNotes').value='';save('Scenario created')};
+$('addScenarioItemBtn').onclick=()=>{const sc=selectedSpendScenario();if(!sc||sc.status==='APPROVED')return;const name=$('wiItemName').value.trim(),amount=n($('wiAmount').value),startMonth=$('wiStart').value,timing=$('wiTiming').value,endMonth=$('wiEnd').value;if(!name||!amount||!startMonth)return alert('Spend item, amount and start month are required.');if(startMonth<projectStartMonth())return alert('Scenario items cannot start before October 2026.');if(timing==='MONTHLY'&&endMonth&&endMonth<startMonth)return alert('End month cannot be earlier than start month.');state.scenarioItems.push({id:id(),scenarioId:sc.id,name,category:$('wiCategory').value.trim()||'Other',amount,currency:$('wiCurrency').value,timing,startMonth,endMonth:timing==='MONTHLY'?endMonth:'',bucket:$('wiBucket').value,notes:$('wiItemNotes').value.trim(),createdAt:new Date().toISOString()});['wiItemName','wiCategory','wiAmount','wiEnd','wiItemNotes'].forEach(x=>$(x).value='');save('Scenario item added')};
+$('deleteScenarioBtn').onclick=deleteSpendScenario;$('approveScenarioBtn').onclick=approveSpendScenario;$('wiTiming').onchange=()=>{if($('wiTiming').value==='ONE_TIME')$('wiEnd').value=''};
 $('quickAddBtn').onclick=()=>{
   const type=$('qType').value,name=$('qName').value.trim(),category=$('qCategory').value.trim()||(type==='income'?'Income':'Other'),date=$('qDate').value,amount=n($('qAmount').value),currency=$('qCurrency').value;
   if(!name||!date||amount<=0)return alert('Name, date and an amount above zero are required.'); if(date<projectStartDate())return alert('FinanceControl starts on 1 October 2026. Entries before the project start are not allowed.');
