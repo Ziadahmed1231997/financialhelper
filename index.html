@@ -87,6 +87,7 @@ body.focus-mode #quickEntryCard{display:none}
 .day-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.week-day{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;text-align:center}.week-day.selected{border-color:#aeb9ff;background:#f7f8ff}.week-day .d{font-size:9px;color:var(--muted);text-transform:uppercase}.week-day .n{font-size:13px;font-weight:850;margin-top:2px}.week-day .amt{font-size:10px;font-weight:750;margin-top:7px}.week-day .bar{height:5px;border-radius:99px;background:#edf0f6;overflow:hidden;margin-top:6px}.week-day .bar i{display:block;height:100%;background:var(--accent)}
 .today-activity{display:grid;gap:7px}.today-tx{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #eef1f5}.today-tx:last-child{border-bottom:0}.today-tx .name{font-size:11px;font-weight:800}.today-tx .sub{font-size:9px;color:var(--muted);margin-top:2px}.today-tx .amt{font-size:12px;font-weight:850}
 @media(max-width:1100px){.today-hero{grid-template-columns:1fr}.pace-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.today-stats,.pace-grid{grid-template-columns:1fr}.daily-mini-fields{grid-template-columns:1fr}.week-strip{grid-template-columns:repeat(4,1fr)}}
+.sync-status{font-size:10px;color:var(--muted);text-align:right;margin:-8px 2px 12px;padding:0}.sync-status.good:before{content:"● ";color:var(--good)}.sync-status.warn:before{content:"● ";color:var(--warn)}
 </style>
 </head>
 <body>
@@ -357,8 +358,9 @@ function projectDefaultDate(){return isoToday<projectStartDate()?projectStartDat
 function updateDataStatus(message='Ready',kind='good'){
   const el=$('dataStatus'); if(!el)return;
   const count=state.transactions.length;
-  el.className=`notice ${kind}`;
-  el.innerHTML=`<b>${BUILD}</b> · ${esc(message)} · project start: <b>1 Oct 2026</b> · <b>${count}</b> transaction${count===1?'':'s'} loaded · backend: <b>${storageMode}</b>${lastSavedText?` · last: ${esc(lastSavedText)}`:''}`;
+  if(kind==='bad'){el.className='notice bad';el.innerHTML=`<b>Sync problem:</b> ${esc(message)}`;return}
+  if(kind==='warn'){el.className='sync-status warn';el.textContent=message;return}
+  el.className='sync-status good';el.textContent=`Synced · ${count} transaction${count===1?'':'s'}${lastSavedText?` · ${lastSavedText}`:''}`
 }
 
 async function loadRemoteState(){
@@ -804,7 +806,8 @@ function isEverydayExpense(t,month){
   if(fixedNames.has(String(t.name||'').trim().toLowerCase()))return false;
   const nonmonthlyCats=new Set(state.budgets.filter(b=>b.bucket==='nonmonthly'&&activeBudget(b,month)).map(b=>b.category));
   if(nonmonthlyCats.has(t.category))return false;
-  if(String(t.category||'').toLowerCase().includes('saving'))return false;
+  const cat=String(t.category||'').trim().toLowerCase();
+  if(['debt','housing','insurance','subscriptions','utilities','savings / goal funding'].includes(cat)||cat.includes('saving'))return false;
   return true
 }
 function everydaySpendRange(start,end){
