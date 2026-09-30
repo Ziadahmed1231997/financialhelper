@@ -43,6 +43,7 @@ async function readState() {
   const values = Object.fromEntries(Object.keys(RANGE_SPECS).map((k, i) => [k, cleanRows(result.data.valueRanges?.[i]?.values || [])]));
   const cats = categoryMaps(values.Categories);
   const config = Object.fromEntries(values.AppConfig.map(r => [String(r[0]||""), r[1]]));
+  const hasId = r => String(r?.[0] ?? "").trim().length > 0;
 
   const state = {
     version: 5,
@@ -51,52 +52,52 @@ async function readState() {
       reportCurrency: config.reporting_currency || "SAR",
       projectStartDate: config.project_start_date || "2026-10-01"
     },
-    accounts: values.Accounts.filter(r => !r[11]).map(r => ({
+    accounts: values.Accounts.filter(r => hasId(r) && !r[11]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"checking").toLowerCase(),
       currency: String(r[3]||"SAR").toUpperCase(), balance: num(r[5] !== "" && r[5] != null ? r[5] : r[4]),
       includeNetWorth: r[6] === "" || r[6] == null ? true : bool(r[6]), notes: String(r[8]||"")
     })),
-    transactions: values.Transactions.filter(r => !r[16]).map(r => ({
+    transactions: values.Transactions.filter(r => hasId(r) && String(r[1]||"").trim() && String(r[3]||"").trim() && num(r[6]) > 0 && !r[16]).map(r => ({
       id: String(r[0]||""), date: String(r[1]||"").slice(0,10), type: String(r[2]||"expense").toLowerCase(),
       name: String(r[3]||""), category: categoryName(r[4], cats), accountId: String(r[5]||""),
       amount: num(r[6]), currency: String(r[7]||"SAR").toUpperCase(), fxRate: num(r[8]) || 1,
       sarAmount: num(r[9]), recurringId: String(r[10]||""), status: String(r[11]||"POSTED"),
       notes: String(r[12]||""), source: String(r[13]||"WEB"), transferToEgypt: bool(r[18])
     })),
-    recurring: values.Recurring.filter(r => !r[17]).map(r => ({
+    recurring: values.Recurring.filter(r => hasId(r) && String(r[1]||"").trim() && num(r[5]) > 0 && month(r[8]) && !r[17]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), type: String(r[2]||"expense").toLowerCase(),
       category: categoryName(r[3], cats), accountId: String(r[4]||""), amount: num(r[5]),
       currency: String(r[6]||"SAR").toUpperCase(), frequency: String(r[7]||"monthly").toLowerCase(),
       startMonth: month(r[8]), endMonth: month(r[9]), fixed: bool(r[10]), active: r[11] === "" || r[11] == null ? true : bool(r[11]),
       day: num(r[13]) || 1, notes: String(r[14]||""), transferToEgypt: bool(r[19])
     })),
-    changes: values.RecurringChanges.filter(r => !r[9]).map(r => ({
+    changes: values.RecurringChanges.filter(r => hasId(r) && !r[9]).map(r => ({
       id: String(r[0]||""), recurringId: String(r[1]||""), effectiveMonth: month(r[2]),
       oldAmount: num(r[3]), newAmount: num(r[4]), reason: String(r[6]||"")
     })),
-    fxRates: values.FXRates.filter(r => !r[9] && String(r[2]||"").toUpperCase() === "EGP" && String(r[3]||"").toUpperCase() === "SAR").map(r => ({
+    fxRates: values.FXRates.filter(r => hasId(r) && !r[9] && String(r[2]||"").toUpperCase() === "EGP" && String(r[3]||"").toUpperCase() === "SAR").map(r => ({
       id: String(r[0]||""), month: month(r[1]), rate: num(r[4]), note: String(r[5]||"")
     })),
-    budgets: values.MonthlyPlans.filter(r => !r[10]).map(r => ({
+    budgets: values.MonthlyPlans.filter(r => hasId(r) && !r[10]).map(r => ({
       id: String(r[0]||""), startMonth: month(r[1]), category: categoryName(r[2], cats), amount: num(r[3]),
       currency: String(r[4]||"SAR").toUpperCase(), bucket: String(r[5]||"flex").toLowerCase(), rollover: bool(r[6]), notes: String(r[7]||""), endMonth: month(r[12]), scheduleMode: String(r[13]||"ongoing").toLowerCase()
     })),
-    goals: values.Goals.filter(r => !r[13]).map(r => ({
+    goals: values.Goals.filter(r => hasId(r) && !r[13]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), target: num(r[2]), currency: String(r[3]||"SAR").toUpperCase(),
       dueMonth: month(r[4]), current: num(r[5]), monthlyContribution: num(r[6]), priority: String(r[7]||""),
       status: String(r[8]||"ACTIVE"), accountId: String(r[9]||""), notes: String(r[10]||"")
     })),
-    events: values.ForecastEvents.filter(r => !r[13]).map(r => ({
+    events: values.ForecastEvents.filter(r => hasId(r) && !r[13]).map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), date: String(r[2]||"").slice(0,10), type: String(r[3]||"expense").toLowerCase(),
       category: categoryName(r[4], cats), amount: num(r[5]), currency: String(r[6]||"SAR").toUpperCase(),
       probability: num(r[7]) || 100, scenarioId: String(r[8]||""), status: String(r[9]||"PLANNED"), notes: String(r[10]||""), accountId: ""
     })),
-    spendScenarios: values.Scenarios.filter(r => !r[9] && String(r[10]||"").toUpperCase() === "SPEND").map(r => ({
+    spendScenarios: values.Scenarios.filter(r => hasId(r) && !r[9] && String(r[10]||"").toUpperCase() === "SPEND").map(r => ({
       id: String(r[0]||""), name: String(r[1]||""), notes: String(r[6]||""),
       status: String(r[11]||"DRAFT").toUpperCase(), approvedAt: String(r[12]||""),
       createdAt: String(r[7]||"")
     })),
-    scenarioItems: values.ScenarioItems.filter(r => !r[13]).map(r => ({
+    scenarioItems: values.ScenarioItems.filter(r => hasId(r) && !r[13]).map(r => ({
       id: String(r[0]||""), scenarioId: String(r[1]||""), name: String(r[2]||""),
       category: categoryName(r[3], cats), amount: num(r[4]), currency: String(r[5]||"SAR").toUpperCase(),
       timing: String(r[6]||"ONE_TIME").toUpperCase(), startMonth: month(r[7]), endMonth: month(r[8]),
