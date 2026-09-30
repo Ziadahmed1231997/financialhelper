@@ -89,6 +89,11 @@ body.focus-mode #quickEntryCard{display:none}
 @media(max-width:1100px){.today-hero{grid-template-columns:1fr}.pace-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.today-stats,.pace-grid{grid-template-columns:1fr}.daily-mini-fields{grid-template-columns:1fr}.week-strip{grid-template-columns:repeat(4,1fr)}}
 .sync-status{font-size:10px;color:var(--muted);text-align:right;margin:-8px 2px 12px;padding:0}.sync-status.good:before{content:"● ";color:var(--good)}.sync-status.warn:before{content:"● ";color:var(--warn)}
 .egypt-flag{display:inline-flex;align-items:center;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:850;background:#f3f5ff;color:#4e5dcc;border:1px solid #dce1ff}.egypt-off{color:var(--muted);font-size:10px}
+
+.egypt-monitor{display:grid;grid-template-columns:minmax(270px,.58fr) minmax(0,1.42fr);gap:12px;background:linear-gradient(135deg,#fffaf1,#fff);border:1px solid #f0d9ad;border-radius:18px;padding:14px 16px;box-shadow:0 8px 24px rgba(119,83,24,.05)}
+.egypt-monitor-main{display:flex;align-items:center;justify-content:space-between;gap:14px}.egypt-monitor .eyebrow{font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#9a6a1c}.egypt-monitor-value{font-size:25px;font-weight:900;margin-top:5px;color:#543b13}.egypt-monitor-sub{font-size:10px;color:#8d744c;margin-top:3px}
+.egypt-monitor-items{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.egypt-item-chip{border:1px solid #ead4ac;background:#fff;border-radius:11px;padding:8px 10px;min-width:130px}.egypt-item-chip .n{font-size:10px;font-weight:850;color:#59431e}.egypt-item-chip .a{font-size:9px;color:#8a724b;margin-top:3px}.egypt-empty{font-size:11px;color:#8a724b;line-height:1.45}.month-egypt{margin-bottom:14px}.egypt-tag-inline{display:inline-flex;align-items:center;border-radius:999px;padding:3px 6px;font-size:8px;font-weight:850;background:#fff4da;color:#96651b;border:1px solid #efd7a4;margin-left:5px}
+@media(max-width:850px){.egypt-monitor{grid-template-columns:1fr}.egypt-monitor-main{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -166,6 +171,14 @@ body.focus-mode #quickEntryCard{display:none}
         </div>
       </div>
 
+      <div class="egypt-monitor" id="todayEgyptMonitor">
+        <div class="egypt-monitor-main">
+          <div><div class="eyebrow">Transfer to Egypt · this month</div><div class="egypt-monitor-value" id="tdEgyptEgp">—</div><div class="egypt-monitor-sub" id="tdEgyptSar">—</div></div>
+          <button class="btn secondary" id="todayEgyptReviewBtn">Review Egypt items</button>
+        </div>
+        <div class="egypt-monitor-items" id="tdEgyptItems"></div>
+      </div>
+
       <div class="pace-grid">
         <div class="pace-card"><div class="k">Budgeted per day</div><div class="v" id="tdDailyBudget">—</div><div class="s">Daily module budget ÷ calendar days.</div></div>
         <div class="pace-card"><div class="k">Budgeted per week</div><div class="v" id="tdWeeklyBudget">—</div><div class="s">Daily budget × 7.</div></div>
@@ -190,6 +203,13 @@ body.focus-mode #quickEntryCard{display:none}
       <div class="position-card"><div><div class="eyebrow">Your position this month</div><div class="hero-value" id="dSafeSpend">—</div><div class="hero-copy" id="dSafeSpendSub">Available after recorded spending and remaining commitments</div></div><div><div class="position-grid"><div class="position-mini"><span>Spent</span><b id="dActualExpense">—</b></div><div class="position-mini"><span>Still committed</span><b id="dStillCommitted">—</b></div><div class="position-mini"><span>Month cash flow</span><b id="dActualNet">—</b></div></div><div class="home-actions"><button class="btn hero-primary" id="homeAddBtn">+ Record transaction</button><button class="btn hero-secondary" id="homeWhatIfBtn">Test a purchase</button><button class="btn hero-secondary" id="homeMonthDetailBtn">Detailed month review</button></div></div></div>
       <div class="month-pulse"><div class="pulse-row"><div class="top"><span>Spending vs monthly plan</span><b id="homePlanUse">—</b></div><div class="pulse-track"><i id="homePlanUseBar" style="width:0%"></i></div><div class="sub" id="homePlanUseSub">—</div></div><div class="pulse-row"><div class="top"><span>Income recorded</span><b id="dActualIncome">—</b></div><div class="sub" id="dActualIncomeSub">—</div></div><div class="pulse-row"><div class="top"><span>Liquid cash</span><b id="dLiquidCash">—</b></div><div class="sub" id="dRunwaySub">—</div></div><div class="pulse-row"><div class="top"><span>Cash runway</span><b id="dRunway">—</b></div><div class="sub">Liquid cash compared with recent average spending.</div></div></div>
     </div>
+    <div class="egypt-monitor month-egypt" id="monthEgyptMonitor">
+      <div class="egypt-monitor-main">
+        <div><div class="eyebrow">Transfer to Egypt · selected month</div><div class="egypt-monitor-value" id="monthEgyptEgp">—</div><div class="egypt-monitor-sub" id="monthEgyptSar">—</div></div>
+        <button class="btn secondary" id="monthEgyptReviewBtn">Open funding plan</button>
+      </div>
+      <div class="egypt-monitor-items" id="monthEgyptItems"></div>
+    </div>
     <div class="home-section-head"><div><h2>Month pulse</h2><p>Only the numbers that help you decide what to do next.</p></div><span id="planHealthLabel" class="pill">—</span></div>
     <div class="home-secondary"><div class="card metric"><div class="label">Planned income</div><div class="value" id="dPlanIncome">—</div><div class="sub" id="dPlanIncomeSub">Recurring + planned income</div></div><div class="card metric"><div class="label">Full planned outflow</div><div class="value" id="dPlanOut">—</div><div class="sub">Commitments + flexible + goals</div></div><div class="card metric" id="dProjectedCard"><div class="label">Projected month result</div><div class="value" id="dProjectedNet">—</div><div class="sub" id="dProjectedSub">Actual + remaining plan</div></div><div class="card metric"><div class="label">Net worth</div><div class="value" id="dNetWorth">—</div><div class="sub">Assets less liabilities</div></div></div>
     <div class="legacy-hidden"><div id="dAvailableCard"><span id="dAvailable"></span></div><span id="dActualExpenseSub"></span><span id="dActualSub"></span></div>
@@ -198,7 +218,7 @@ body.focus-mode #quickEntryCard{display:none}
     <div class="home-section-head"><div><h2>What is coming?</h2><p>Known commitments, plan position, and control warnings.</p></div></div>
     <div class="grid two"><div class="card"><div class="section-title"><h3>Upcoming 30 days</h3><span>Known commitments & events</span></div><div id="upcomingList"></div></div><div class="card"><div class="section-title"><h3>Plan composition</h3><span id="forecastHeadline">Current month</span></div><div class="kpi-strip"><div class="mini"><div class="k">Fixed / income</div><div class="v" id="fixedRatio">—</div></div><div class="mini"><div class="k">Budget remaining</div><div class="v" id="budgetRemaining">—</div></div><div class="mini"><div class="k">Goal funding</div><div class="v" id="goalFunding">—</div></div><div class="mini"><div class="k">EGP / SAR</div><div class="v" id="dashboardFx">—</div></div></div><div id="dashboardPlanBuckets" style="margin-top:12px"></div></div></div>
     <div class="grid two" style="margin-top:14px"><div class="card chart"><div class="section-title"><h3>Looking ahead</h3><span>12-month projected liquid balance</span></div><div id="dashboardForecastChart"></div><div class="legend"><span><i class="l1"></i>Projected balance</span></div></div><div class="card"><div class="section-title"><h3>Needs attention</h3><span>Control checks</span></div><div class="alerts" id="dashboardAlerts"></div></div></div>
-    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Recent activity</h3><span id="recentCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">Report value</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></div>
+    <div class="card" style="margin-top:14px"><div class="section-title"><h3>Recent activity</h3><span id="recentCount">—</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Category</th><th>Account</th><th class="num">Original</th><th class="num">Report value</th><th>Egypt</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></div>
   </section>
 
   <section class="panel" id="monthly">
