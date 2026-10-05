@@ -593,9 +593,83 @@ function deltaMarkup(cur,prev,{lowerIsBetter=false}={}){
   const up=d>0,good=lowerIsBetter?!up:up;
   return `<span class="delta ${good?'up':'down'}">${up?'↑':'↓'} ${abs.toFixed(1)}% vs prior month</span>`
 }
-function recurringPaidSar(r,month){
+function duePaymentCandidates(r,month){
+  const linked=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&t.recurringId===r.id);
+  if(linked.length)return {rows:linked,mode:'linked'};
+  const sameNameSeries=state.recurring.filter(x=>x.type==='expense'&&recurringApplies(x,month)&&String(x.name||'').trim().toLowerCase()===String(r.name||'').trim().toLowerCase());
+  if(sameNameSeries.length!==1)return {rows:[],mode:'none'};
   const target=String(r.name||'').trim().toLowerCase();
-  return state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&String(t.name||'').trim().toLowerCase()===target).reduce((sum,t)=>sum+transactionSar(t),0)
+  const legacy=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&!t.recurringId&&String(t.name||'').trim().toLowerCase()===target);
+  return {rows:legacy,mode:legacy.length?'matched':'none'}
+}
+function recurringPaidSar(r,month){
+  return duePaymentCandidates(r,month).rows.reduce((sum,t)=>sum+transactionSar(t),0)
+}
+function sarInCurrency(sar,currency,month){return currency==='EGP'?sar*latestFx(month):sar}
+function duesForMonth(month){
+  return state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).map(r=>{
+    const dueSar=recurringMonthlySar(r,month),match=duePaymentCandidates(r,month),rawPaid=match.rows.reduce((sum,t)=>sum+transactionSar(t),0),paidSar=Math.min(dueSar,rawPaid),remainingSar=Math.max(0,dueSar-paidSar);
+    const status=remainingSar<=.01?'PAID':paidSar>.01?'PARTIAL':'UNPAID';
+    return {r,dueSar,paidSar,remainingSar,status,matchMode:match.mode,dueNative:recurringAmount(r,month),paidNative:sarInCurrency(paidSar,r.currency,month),remainingNative:sarInCurrency(remainingSar,r.currency,month)}
+  }).sort((a,b)=>(a.r.day||1)-(b.r.day||1)||a.r.name.localeCompare(b.r.name))
+}
+function duesSummary(month){
+  const lines=duesForMonth(month),total=lines.reduce((s,x)=>s+x.dueSar,0),paid=lines.reduce((s,x)=>s+x.paidSar,0),remaining=lines.reduce((s,x)=>s+x.remainingSar,0),open=lines.filter(x=>x.remainingSar>.01).length;
+  return {lines,total,paid,remaining,open}
+}
+function duePaymentDate(month,r){
+  if(monthOf(isoToday)===month&&isoToday>=projectStartDate())return isoToday;
+  const dim=daysInMonth(month),day=Math.min(dim,Math.max(1,n(r.day)||1));
+  return `${month}-${String(day).padStart(2,'0')}`
+}
+async function markDuePaid(recurringId,month,partial=false){
+  const r=state.recurring.find(x=>x.id===recurringId);if(!r)return;
+  const line=duesForMonth(month).find(x=>x.r.id===recurringId);if(!line||line.remainingSar<=.01)return;
+  let amountNative=line.remainingNative;
+  if(partial){
+    const v=prompt(`Amount paid for "${r.name}" in ${r.currency}. Remaining due: ${moneyNative(line.remainingNative,r.currency)}`,String(Number(line.remainingNative.toFixed(2))));
+    if(v===null)return;amountNative=n(v);if(amountNative<=0)return alert('Enter an amount above zero.');if(amountNative>line.remainingNative+.01)return alert('Partial payment cannot exceed the remaining due.')
+  }
+  const fx=r.currency==='EGP'?latestFx(month):1;
+  state.transactions.push({
+    id:id(),type:'expense',name:r.name,category:r.category||'Other',date:duePaymentDate(month,r),amount:amountNative,currency:r.currency||'SAR',accountId:r.accountId||'',fxRate:fx,sarAmount:toSAR(amountNative,r.currency||'SAR',month,fx),recurringId:r.id,status:'POSTED',notes:partial?'Partial recurring due payment':'Recurring due payment',source:'DUE_PAYMENT',transferToEgypt:!!r.transferToEgypt
+  });
+  await save(partial?`Partial due paid: ${r.name}`:`Due paid: ${r.name}`)
+}
+async function reopenDue(recurringId,month){
+  const linked=state.transactions.filter(t=>t.recurringId===recurringId&&monthOf(t.date)===month);
+  if(!linked.length)return alert('This due is matched from an existing transaction rather than a generated due payment. Edit or remove that transaction from Activity if it should not count as paid.');
+  if(!confirm('Reopen this due? FinanceControl-created due payments will be removed; manually linked transactions will only be unlinked.'))return;
+  state.transactions=state.transactions.filter(t=>{
+    if(t.recurringId!==recurringId||monthOf(t.date)!==month)return true;
+    if(t.source==='DUE_PAYMENT')return false;
+    t.recurringId='';return true
+  });
+  await save('Due reopened')
+}
+function dueStatusHtml(x){
+  const cls=x.status==='PAID'?'paid':x.status==='PARTIAL'?'partial':'unpaid';
+  const suffix=x.matchMode==='matched'&&x.status!=='UNPAID'?' · matched':'';
+  return `<span class="due-status ${cls}">${x.status==='PAID'?'Paid':x.status==='PARTIAL'?'Partial':'Unpaid'}${suffix}</span>`
+}
+function dueActionsHtml(x,month){
+  if(x.status==='PAID')return x.matchMode==='linked'?`<button class="btn secondary small" onclick="reopenDue('${x.r.id}','${month}')">Reopen</button>`:'';
+  return `<button class="btn soft small" onclick="markDuePaid('${x.r.id}','${month}',false)">Mark paid</button><button class="btn secondary small" onclick="markDuePaid('${x.r.id}','${month}',true)">Partial</button>`
+}
+function renderDues(month){
+  const d=duesSummary(month);
+  if($('tdDuesMonth'))$('tdDuesMonth').textContent=monthLabel(month);
+  if($('tdDuesTotal'))$('tdDuesTotal').textContent=moneySar(d.total,month);
+  if($('tdDuesPaid'))$('tdDuesPaid').textContent=moneySar(d.paid,month);
+  if($('tdDuesRemaining'))$('tdDuesRemaining').textContent=moneySar(d.remaining,month);
+  if($('tdDuesRemainingBadge'))$('tdDuesRemainingBadge').textContent=d.open?`${d.open} remaining`:'All paid';
+  if($('tdDueList'))$('tdDueList').innerHTML=d.lines.length?d.lines.slice(0,8).map(x=>`<div class="due-item"><div><div class="n">${esc(x.r.name)} ${x.r.transferToEgypt?'<span class="egypt-tag-inline">Egypt</span>':''}</div><div class="sub">Due day ${x.r.day||1} · ${moneyNative(x.dueNative,x.r.currency)} · ${dueStatusHtml(x)}</div></div><div class="amt"><b>${moneyNative(x.remainingNative,x.r.currency)}</b><div class="muted">remaining</div></div><div class="due-actions">${dueActionsHtml(x,month)}</div></div>`).join(''):'<div class="empty">No recurring expense dues for this month.</div>';
+  if($('planDuesStatus'))$('planDuesStatus').textContent=d.open?`${d.open} open`:'All paid';
+  if($('planDuesTotal'))$('planDuesTotal').textContent=moneySar(d.total,month);
+  if($('planDuesPaid'))$('planDuesPaid').textContent=moneySar(d.paid,month);
+  if($('planDuesRemaining'))$('planDuesRemaining').textContent=moneySar(d.remaining,month);
+  if($('planDuesOpenCount'))$('planDuesOpenCount').textContent=String(d.open);
+  if($('planDuesTable'))$('planDuesTable').innerHTML=d.lines.length?d.lines.map(x=>`<tr><td><strong>${esc(x.r.name)}</strong>${x.r.transferToEgypt?'<span class="egypt-tag-inline">Egypt</span>':''}<div class="muted">${esc(x.r.category||'Other')}</div></td><td>Day ${x.r.day||1}</td><td class="num">${moneyNative(x.dueNative,x.r.currency)}</td><td class="num">${moneyNative(x.paidNative,x.r.currency)}</td><td class="num ${x.remainingSar>.01?'negative':'positive'}">${moneyNative(x.remainingNative,x.r.currency)}</td><td>${dueStatusHtml(x)}</td><td><div class="actions">${dueActionsHtml(x,month)}</div></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No recurring expense dues for this month.</td></tr>'
 }
 function remainingRecurringSar(month){
   return state.recurring.filter(r=>r.type==='expense'&&recurringApplies(r,month)).reduce((sum,r)=>sum+Math.max(0,recurringMonthlySar(r,month)-recurringPaidSar(r,month)),0)
