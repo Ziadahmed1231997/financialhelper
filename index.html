@@ -625,11 +625,17 @@ function duePaymentDate(month,r){
 async function markDuePaid(recurringId,month,partial=false){
   const r=state.recurring.find(x=>x.id===recurringId);if(!r)return;
   const line=duesForMonth(month).find(x=>x.r.id===recurringId);if(!line||line.remainingSar<=.01)return;
-  if(line.matchMode==='matched'){
+  let remainingSar=line.remainingSar;
+  if(!partial){
     const target=String(r.name||'').trim().toLowerCase();
-    state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&!t.recurringId&&String(t.name||'').trim().toLowerCase()===target).forEach(t=>t.recurringId=r.id)
+    const candidates=state.transactions.filter(t=>t.type==='expense'&&monthOf(t.date)===month&&!t.recurringId&&String(t.name||'').trim().toLowerCase()===target).sort((a,b)=>a.date.localeCompare(b.date));
+    for(const t of candidates){
+      t.recurringId=r.id;remainingSar=Math.max(0,remainingSar-transactionSar(t));
+      if(remainingSar<=.01)break
+    }
+    if(remainingSar<=.01){await save(`Due matched to existing payment: ${r.name}`);return}
   }
-  let amountNative=line.remainingNative;
+  let amountNative=sarInCurrency(remainingSar,r.currency,month);
   if(partial){
     const v=prompt(`Amount paid for "${r.name}" in ${r.currency}. Remaining due: ${moneyNative(line.remainingNative,r.currency)}`,String(Number(line.remainingNative.toFixed(2))));
     if(v===null)return;amountNative=n(v);if(amountNative<=0)return alert('Enter an amount above zero.');if(amountNative>line.remainingNative+.01)return alert('Partial payment cannot exceed the remaining due.')
